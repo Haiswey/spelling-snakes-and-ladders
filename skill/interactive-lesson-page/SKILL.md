@@ -12,16 +12,15 @@ star count, and a finish page. It works offline and is hosted at a link the teac
 
 Two worked examples exist:
 - `assets/example-lesson.src.html`: Year 1 SJKC "找谁来帮忙" (lesson page with stories).
-- `references/game-activities.md`: Year 2 "Spelling Snakes and Ladders" (game, built Oct 2026; GitHub
-  `Haiswey/spelling-snakes-and-ladders`). Read it for any game-type activity.
+- Year 2 "Spelling Snakes and Ladders" (game, Oct 2026): see "Game-type activities" below.
 
 ## Standing rules of this teacher (apply from the first draft; never ask again)
 
 These were learned the hard way (the teacher corrected each one at least once). Put them in the first draft.
 
 1. **No emoji, and no emoji-style icon sets** (Fluent, OpenMoji, Twemoji, Noto all got rejected as "emoji-like").
-   Pictures are Canva-generated kawaii illustrations (see `references/illustrations.md` and
-   `references/game-activities.md`, "Pictures"). OpenMoji is only a last-resort fallback for tiny icons.
+   Pictures are Canva-generated kawaii illustrations (see `references/illustrations.md` and the
+   "Pictures: the Canva sticker-sheet method" section below). OpenMoji is only a last-resort fallback for tiny icons.
 2. **Everything embedded** in the single HTML file: images (base64 WebP), audio (base64 MP3), fonts (base64
    woff2). No external URLs, so it works offline at home.
 3. **Voice = edge-tts MP3, never `speechSynthesis`.** British English for English lessons
@@ -62,13 +61,11 @@ pages, not from the code:
 2. **Plan activities from the learning standards.** Each standard gets at least one activity of a fitting type
    (recognise -> yes/no pictures; choose the right action -> two-option scenes and matching; practise -> chat
    stories; spell -> spelling game). Show a short table, adjust, then build.
-3. **Style tile.** Before the full build, make one test sheet of illustrations and show it (the 3x3 sheet method
-   in `references/game-activities.md`). Agree the look, then batch.
+3. **Style tile.** Before the full build, make one test sheet of illustrations and show it (the 3x3 sheet method below). Agree the look, then batch.
 4. **Build the page** from the example, following `references/page-template-guide.md`. Keep source separate
    (`src/template.html`, `style.css`, `app.js`, data in JSON) and assemble with a build script. Data first: words,
    sentences and questions live in JSON so the teacher can change them.
-5. **Illustrations.** Follow `references/illustrations.md` (scenes) and `references/game-activities.md` (sticker
-   sheets of 9 items per call, cut out locally). One style line, explicit facial expressions, full-size export
+5. **Illustrations.** Follow `references/illustrations.md` (scenes) and the sticker-sheet method below (sheets of 9 items per call, cut out locally). One style line, explicit facial expressions, full-size export
    through a Canva design, person-by-person check of every picture.
 6. **Voice.** Follow `references/voice.md`. Collect every spoken line, generate edge-tts MP3s, embed them. The
    older note that Microsoft refuses cloud machines is true; on the teacher's own computer the generation runs fine
@@ -96,7 +93,7 @@ Every time a new tool is finished, spend five minutes recording what was learned
 
 ## Page conventions the scripts rely on
 
-(Lesson pages. Games use their own structure, see `references/game-activities.md`.)
+(Lesson pages. Games use their own structure, see "Game-type activities".)
 
 - Pages: `<section class="step">` elements (`data-title`), moved with `data-go="N"` buttons, `go(i)`.
 - Read-aloud: any `<button class="say" data-say="sentence">`. Every spoken line goes through one `say(text)` function
@@ -107,6 +104,81 @@ Every time a new tool is finished, spend five minutes recording what was learned
   "finish" button; the story list shows progress.
 - Colour and spacing come from CSS tokens on `:root` with light and dark variants; no sideways scroll at 390 px.
 - Prefix CSS classes by component (`.pface`, `.qtop`). A shared name like `.face` once broke the layout.
+
+## Game-type activities (board games, spelling games)
+
+First built: Spelling Snakes and Ladders, Year 2, Oct 2026 (repo `Haiswey/spelling-snakes-and-ladders`, full notes in its `docs/process-and-lessons.md`).
+Use a game for drill and recall (spelling, vocabulary, number facts); use the lesson page for teaching new content.
+
+A game suits drill and recall (spelling, vocabulary, number facts) that pupils repeat alone. Use the lesson page for
+teaching new content with stories and choices.
+
+### Project layout (copy it)
+```
+src/template.html   page skeleton with /*CSS*/ and /*JS*/ placeholders
+src/style.css       design tokens + components, /*FONTFACE*/ placeholder
+src/app.js          game logic, /*WORDS*/ /*IMGS*/ /*AUDIO*/ placeholders
+src/words.json      content: word, picture key, sentence, tier
+src/imgs.json       key -> data:image/webp;base64
+src/audio.json      key -> base64 mp3
+src/fonts/          Fredoka.woff2, PlaypenSans.woff2
+src/build.py        writes ../index.html (one file, offline)
+.vercelignore       src/   (only index.html ships)
+```
+
+### Design system (do this before any screen)
+- Tokens: ink `#1f2a5c`, sky gradient backdrop with hills and drifting clouds, go green `#3fc34d`, play orange
+  `#ff8a1f`, blue `#3d7bff`, sun `#ffc933`. Radius 14 / 20 / 28. Soft shadows, plus a 6 px "chunky" bottom edge on buttons.
+- Fonts: Fredoka for UI, Playpen Sans for anything a pupil must copy (single-storey a and g). Both embedded.
+- One picture style everywhere. Interface icons come from the same Canva set; only trivial glyphs (speaker, mute,
+  tick) are drawn as vector.
+- Layout: phone first. Dice and message above the board on small screens, side panel on desktop. Short-height media
+  query so the question card fits on one screen.
+- Motion: pop-in, jump on correct letters, shake on wrong, confetti, rotating sunburst behind the mascot, stars pop in
+  one by one. Honour `prefers-reduced-motion`.
+
+### Pictures: the Canva sticker-sheet method
+1. One `generate-image` call = one 3x3 sheet of 9 items. Prompt: "neat 3 by 3 grid of 9 separate cute kawaii sticker
+   illustrations for a children's English vocabulary game, plain solid white background, wide empty space between every
+   item, nothing touching the edges. Items in reading order: ... Consistent style: soft flat vector, thick rounded pastel
+   outlines, gentle gradients, big sparkly eyes and rosy cheeks, bright cheerful colours, no text, no shadows."
+   Group sheets by theme (animals, food, toys, clothes, home, people, numbers, game icons, avatars).
+2. The tool returns only a 200 px thumbnail + media id. To get full size: `create-design` (the "blank" design comes with
+   template text/photos; delete them), `read-design` open_transaction, `edit-design` `add_page` per sheet then
+   `insert_fill` (get new page ids with `read-design` `filter.page_indices`), `commit`, `export-design` PNG 2160 px all
+   pages, download the signed URLs with curl (works from a local computer).
+3. `scripts/cut_sheets.py`: flood-fill white background from the border, crop thirds, trim, 256 px WebP with alpha.
+4. Open the generated contact sheet and check every picture before building. Regenerate single bad ones only.
+5. Cost: 10 generation calls gave 91 pictures. Show one sheet to the teacher first.
+Never leave the one-design-per-sheet pattern: it needs a design per call and many more steps.
+
+### Voice
+`scripts/make_audio.py` reads `words.json` and makes: word clip, dictation clip ("word. sentence. word."), letter names
+(British: aitch, zed), dice numbers, praise, try-again, ladder, snake, win. edge-tts `en-GB-SoniaNeural`, rate -10%,
+6 parallel requests, retries, only missing clips. Playback: decode base64 to a Blob URL on demand, one clip at a time,
+`seq()` for chains (spell out a missed word), mute switch, stop audio on navigation.
+Size: about 17 KB per clip, so 278 clips = 6 MB. Re-encode to 32 kbps mono if size matters.
+
+### Game rules that worked for Year 2
+- Two modes: by myself (audio + keyboard) and with help (picture, written sentence, first letter given, tap-letter bank
+  with 3 decoys, Hint button). A Help switch changes mode mid-game.
+- Gentle: right answer takes the ladder, wrong on a snake slides down, wrong elsewhere costs nothing. Two tries, then
+  show and spell the word aloud.
+- Stars 3/2/1/0; no negative marking. Words in three tiers, harder ones later; no repeats within a game.
+- Finish page: stars, words to practise (tap to hear), copy-result button. No pupil data leaves the device.
+
+### Testing a game
+- Run in a browser pane at 577 px (phone) and a desktop width. Scripted play with `javascript_exec`: roll, answer right,
+  answer wrong twice, ladder, snake, finish. Check console errors.
+- Decode a few audio clips and print durations. Screenshot all pictures.
+- Wait about 1 s after a screen change before screenshotting (fade-in).
+- Help mode only accepts letters that exist as tiles; test it with tile clicks, solo mode with keystrokes.
+
+### Publish
+`git init -b main`, set repo-local identity `<id>+<user>@users.noreply.github.com`, `.gitignore` (`.vercel`, `.env.local`,
+`src/art/` for 40 MB sheets), commit, `gh repo create <user>/<name> --public --source . --push`, `vercel link --yes
+--project <name> --scope <team>`, `vercel git connect <repo url>`, `vercel --prod --yes` once. After that `git push`
+redeploys. Verify with `curl` (HTTP 200, expected size).
 
 ## Useful commands (paths relative to this skill)
 
@@ -133,10 +205,8 @@ up by exact text.
 - `references/intake-and-design.md`: questions to ask, activity types, wording and safety for young pupils.
 - `references/page-template-guide.md`: how the example page is organised and what to change.
 - `references/illustrations.md`: Canva workflow for scenes, prompt recipe, expression rules, resolution, licences.
-- `references/game-activities.md`: **new**. Game pipeline: design system, sticker-sheet pictures via Canva, edge-tts,
-  build, GitHub + Vercel, testing. Includes the Spelling Snakes and Ladders case.
 - `references/voice.md`: voice choice, playback rules.
 - `references/qa-and-publish.md`: checks before publishing, GitHub, artifact, Vercel, custom address.
 - `references/network-domains.md`: which web addresses the environment must allow.
 - `references/lessons-learned.md`: mistakes in the original Year 1 project and the fix for each.
-- `references/experience-log.md`: **new**. Running log; add one entry after every finished tool.
+- `references/experience-log.md`: Running log; add one entry after every finished tool.
