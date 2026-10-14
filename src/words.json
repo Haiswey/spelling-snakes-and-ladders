@@ -1,0 +1,686 @@
+[
+ {
+  "w": "cat",
+  "p": "@cat",
+  "s": "The ___ drinks milk.",
+  "t": 1
+ },
+ {
+  "w": "dog",
+  "p": "@dog",
+  "s": "The ___ can run fast.",
+  "t": 1
+ },
+ {
+  "w": "rat",
+  "p": "@rat",
+  "s": "The ___ is under the bag.",
+  "t": 1
+ },
+ {
+  "w": "pen",
+  "p": "@pen",
+  "s": "I write with a ___.",
+  "t": 1
+ },
+ {
+  "w": "bag",
+  "p": "@bag",
+  "s": "My books are in my ___.",
+  "t": 1
+ },
+ {
+  "w": "cap",
+  "p": "@cap",
+  "s": "He wears a ___ on his head.",
+  "t": 1
+ },
+ {
+  "w": "car",
+  "p": "@car",
+  "s": "Dad drives a ___.",
+  "t": 1
+ },
+ {
+  "w": "red",
+  "p": "#e53935",
+  "s": "The apple is ___.",
+  "t": 1
+ },
+ {
+  "w": "blue",
+  "p": "#1e88e5",
+  "s": "The sky is ___.",
+  "t": 1
+ },
+ {
+  "w": "ten",
+  "p": "@n10",
+  "s": "I have ___ fingers.",
+  "t": 1
+ },
+ {
+  "w": "six",
+  "p": "@n6",
+  "s": "One, two, three, four, five, ___.",
+  "t": 1
+ },
+ {
+  "w": "one",
+  "p": "@n1",
+  "s": "I have ___ nose.",
+  "t": 1
+ },
+ {
+  "w": "two",
+  "p": "@n2",
+  "s": "I have ___ eyes.",
+  "t": 1
+ },
+ {
+  "w": "four",
+  "p": "@n4",
+  "s": "A dog has ___ legs.",
+  "t": 1
+ },
+ {
+  "w": "five",
+  "p": "@n5",
+  "s": "I have ___ fingers on one hand.",
+  "t": 1
+ },
+ {
+  "w": "nine",
+  "p": "@n9",
+  "s": "Eight, ___, ten.",
+  "t": 1
+ },
+ {
+  "w": "leg",
+  "p": "@leg",
+  "s": "I kick the ball with my ___.",
+  "t": 1
+ },
+ {
+  "w": "arm",
+  "p": "@arm",
+  "s": "I wave my ___.",
+  "t": 1
+ },
+ {
+  "w": "hand",
+  "p": "@hand",
+  "s": "I wash my ___.",
+  "t": 1
+ },
+ {
+  "w": "foot",
+  "p": "@foot",
+  "s": "I have one ___ in my shoe.",
+  "t": 1
+ },
+ {
+  "w": "toes",
+  "p": null,
+  "s": "I have ten ___ on my feet.",
+  "t": 1
+ },
+ {
+  "w": "fish",
+  "p": "@fish",
+  "s": "A ___ can swim.",
+  "t": 1
+ },
+ {
+  "w": "duck",
+  "p": "@duck",
+  "s": "The ___ is on the water.",
+  "t": 1
+ },
+ {
+  "w": "frog",
+  "p": "@frog",
+  "s": "The ___ can jump.",
+  "t": 1
+ },
+ {
+  "w": "book",
+  "p": "@book",
+  "s": "I read a ___.",
+  "t": 1
+ },
+ {
+  "w": "ball",
+  "p": "@ball",
+  "s": "Kick the ___!",
+  "t": 1
+ },
+ {
+  "w": "bike",
+  "p": "@bike",
+  "s": "I ride my ___.",
+  "t": 1
+ },
+ {
+  "w": "cake",
+  "p": "@cake",
+  "s": "I eat a birthday ___.",
+  "t": 1
+ },
+ {
+  "w": "kite",
+  "p": "@kite",
+  "s": "The ___ is in the sky.",
+  "t": 1
+ },
+ {
+  "w": "desk",
+  "p": null,
+  "s": "I sit at my ___.",
+  "t": 1
+ },
+ {
+  "w": "doll",
+  "p": null,
+  "s": "She plays with a ___.",
+  "t": 1
+ },
+ {
+  "w": "mum",
+  "p": "@mum",
+  "s": "My ___ cooks dinner.",
+  "t": 1
+ },
+ {
+  "w": "dad",
+  "p": "@dad",
+  "s": "My ___ drives a car.",
+  "t": 1
+ },
+ {
+  "w": "and",
+  "p": null,
+  "s": "Mum ___ Dad are at home.",
+  "t": 1
+ },
+ {
+  "w": "you",
+  "p": null,
+  "s": "How old are ___?",
+  "t": 1
+ },
+ {
+  "w": "the",
+  "p": null,
+  "s": "I like ___ red kite.",
+  "t": 1
+ },
+ {
+  "w": "was",
+  "p": null,
+  "s": "The cat ___ happy.",
+  "t": 1
+ },
+ {
+  "w": "are",
+  "p": null,
+  "s": "We ___ friends.",
+  "t": 1
+ },
+ {
+  "w": "yes",
+  "p": null,
+  "s": "Do you like cake? ___, I do.",
+  "t": 1
+ },
+ {
+  "w": "big",
+  "p": null,
+  "s": "The elephant is ___.",
+  "t": 1
+ },
+ {
+  "w": "look",
+  "p": null,
+  "s": "___ at the bird!",
+  "t": 1
+ },
+ {
+  "w": "come",
+  "p": null,
+  "s": "___ and play with me.",
+  "t": 1
+ },
+ {
+  "w": "play",
+  "p": null,
+  "s": "I ___ with my friends.",
+  "t": 1
+ },
+ {
+  "w": "like",
+  "p": null,
+  "s": "I ___ ice cream.",
+  "t": 1
+ },
+ {
+  "w": "have",
+  "p": null,
+  "s": "I ___ a new bag.",
+  "t": 1
+ },
+ {
+  "w": "green",
+  "p": "#43a047",
+  "s": "The frog is ___.",
+  "t": 2
+ },
+ {
+  "w": "yellow",
+  "p": "#fdd835",
+  "s": "The banana is ___.",
+  "t": 2
+ },
+ {
+  "w": "purple",
+  "p": "#8e24aa",
+  "s": "The grapes are ___.",
+  "t": 2
+ },
+ {
+  "w": "orange",
+  "p": "@orange",
+  "s": "I peel an ___.",
+  "t": 2
+ },
+ {
+  "w": "three",
+  "p": "@n3",
+  "s": "One, two, ___.",
+  "t": 2
+ },
+ {
+  "w": "seven",
+  "p": "@n7",
+  "s": "I am ___ years old.",
+  "t": 2
+ },
+ {
+  "w": "eight",
+  "p": "@n8",
+  "s": "A spider has ___ legs.",
+  "t": 2
+ },
+ {
+  "w": "pencil",
+  "p": "@pencil",
+  "s": "I draw with a ___.",
+  "t": 2
+ },
+ {
+  "w": "ruler",
+  "p": "@ruler",
+  "s": "I measure with a ___.",
+  "t": 2
+ },
+ {
+  "w": "rubber",
+  "p": null,
+  "s": "I use a ___ to rub out my mistake.",
+  "t": 2
+ },
+ {
+  "w": "plane",
+  "p": "@plane",
+  "s": "The ___ flies in the sky.",
+  "t": 2
+ },
+ {
+  "w": "train",
+  "p": "@train",
+  "s": "The ___ goes on the track.",
+  "t": 2
+ },
+ {
+  "w": "robot",
+  "p": "@robot",
+  "s": "The ___ can dance.",
+  "t": 2
+ },
+ {
+  "w": "game",
+  "p": "@game",
+  "s": "I play a computer ___.",
+  "t": 2
+ },
+ {
+  "w": "apple",
+  "p": "@apple",
+  "s": "I eat a red ___.",
+  "t": 2
+ },
+ {
+  "w": "pizza",
+  "p": "@pizza",
+  "s": "I like cheese ___.",
+  "t": 2
+ },
+ {
+  "w": "spider",
+  "p": "@spider",
+  "s": "The ___ has eight legs.",
+  "t": 2
+ },
+ {
+  "w": "lizard",
+  "p": "@lizard",
+  "s": "The ___ is on the wall.",
+  "t": 2
+ },
+ {
+  "w": "banana",
+  "p": "@banana",
+  "s": "The monkey eats a ___.",
+  "t": 2
+ },
+ {
+  "w": "cheese",
+  "p": "@cheese",
+  "s": "The mouse likes ___.",
+  "t": 2
+ },
+ {
+  "w": "carrot",
+  "p": "@carrot",
+  "s": "A rabbit eats a ___.",
+  "t": 2
+ },
+ {
+  "w": "shoes",
+  "p": "@shoes",
+  "s": "I wear ___ on my feet.",
+  "t": 2
+ },
+ {
+  "w": "socks",
+  "p": "@socks",
+  "s": "I wear ___ in my shoes.",
+  "t": 2
+ },
+ {
+  "w": "shorts",
+  "p": "@shorts",
+  "s": "I wear ___ when it is hot.",
+  "t": 2
+ },
+ {
+  "w": "jeans",
+  "p": "@jeans",
+  "s": "I wear blue ___.",
+  "t": 2
+ },
+ {
+  "w": "skirt",
+  "p": null,
+  "s": "She wears a ___ to school.",
+  "t": 2
+ },
+ {
+  "w": "jacket",
+  "p": "@jacket",
+  "s": "I wear a ___ when it is cold.",
+  "t": 2
+ },
+ {
+  "w": "head",
+  "p": null,
+  "s": "I wear a hat on my ___.",
+  "t": 2
+ },
+ {
+  "w": "knee",
+  "p": null,
+  "s": "I bend my ___.",
+  "t": 2
+ },
+ {
+  "w": "beach",
+  "p": "@beach",
+  "s": "We play at the ___.",
+  "t": 2
+ },
+ {
+  "w": "shell",
+  "p": "@shell",
+  "s": "I find a ___ on the beach.",
+  "t": 2
+ },
+ {
+  "w": "photo",
+  "p": "@photo",
+  "s": "I take a ___ of my family.",
+  "t": 2
+ },
+ {
+  "w": "music",
+  "p": "@music",
+  "s": "I listen to ___.",
+  "t": 2
+ },
+ {
+  "w": "friend",
+  "p": "@friend",
+  "s": "My ___ sits next to me.",
+  "t": 2
+ },
+ {
+  "w": "school",
+  "p": "@school",
+  "s": "I go to ___ every day.",
+  "t": 2
+ },
+ {
+  "w": "house",
+  "p": "@house",
+  "s": "I live in a ___.",
+  "t": 2
+ },
+ {
+  "w": "stairs",
+  "p": null,
+  "s": "I go up the ___.",
+  "t": 2
+ },
+ {
+  "w": "please",
+  "p": null,
+  "s": "May I have a pencil, ___?",
+  "t": 2
+ },
+ {
+  "w": "went",
+  "p": null,
+  "s": "We ___ to the beach.",
+  "t": 2
+ },
+ {
+  "w": "they",
+  "p": null,
+  "s": "___ are my friends.",
+  "t": 2
+ },
+ {
+  "w": "said",
+  "p": null,
+  "s": "Mum ___ hello.",
+  "t": 2
+ },
+ {
+  "w": "with",
+  "p": null,
+  "s": "I play ___ my friend.",
+  "t": 2
+ },
+ {
+  "w": "this",
+  "p": null,
+  "s": "___ is my pencil.",
+  "t": 2
+ },
+ {
+  "w": "that",
+  "p": null,
+  "s": "___ is a big bird.",
+  "t": 2
+ },
+ {
+  "w": "what",
+  "p": null,
+  "s": "___ is your name?",
+  "t": 2
+ },
+ {
+  "w": "where",
+  "p": null,
+  "s": "___ is my bag?",
+  "t": 2
+ },
+ {
+  "w": "there",
+  "p": null,
+  "s": "___ is a cat on the bed.",
+  "t": 2
+ },
+ {
+  "w": "little",
+  "p": null,
+  "s": "The kitten is ___.",
+  "t": 2
+ },
+ {
+  "w": "elephant",
+  "p": "@elephant",
+  "s": "The ___ has a long nose.",
+  "t": 3
+ },
+ {
+  "w": "computer",
+  "p": "@computer",
+  "s": "I play games on the ___.",
+  "t": 3
+ },
+ {
+  "w": "notebook",
+  "p": "@notebook",
+  "s": "I write in my ___.",
+  "t": 3
+ },
+ {
+  "w": "sandwich",
+  "p": "@sandwich",
+  "s": "I eat a cheese ___.",
+  "t": 3
+ },
+ {
+  "w": "sausage",
+  "p": "@sausage",
+  "s": "I like a hot ___.",
+  "t": 3
+ },
+ {
+  "w": "chicken",
+  "p": "@chicken",
+  "s": "We eat fried ___.",
+  "t": 3
+ },
+ {
+  "w": "kitchen",
+  "p": "@kitchen",
+  "s": "Mum cooks in the ___.",
+  "t": 3
+ },
+ {
+  "w": "bathroom",
+  "p": "@bathroom",
+  "s": "I wash in the ___.",
+  "t": 3
+ },
+ {
+  "w": "bedroom",
+  "p": "@bedroom",
+  "s": "I sleep in my ___.",
+  "t": 3
+ },
+ {
+  "w": "picture",
+  "p": "@picture",
+  "s": "I paint a ___.",
+  "t": 3
+ },
+ {
+  "w": "monster",
+  "p": "@monster",
+  "s": "The ___ is ugly.",
+  "t": 3
+ },
+ {
+  "w": "sweater",
+  "p": null,
+  "s": "I wear a warm ___.",
+  "t": 3
+ },
+ {
+  "w": "trousers",
+  "p": null,
+  "s": "He wears long ___.",
+  "t": 3
+ },
+ {
+  "w": "sandcastle",
+  "p": "@sandcastle",
+  "s": "We make a ___ on the beach.",
+  "t": 3
+ },
+ {
+  "w": "Monday",
+  "p": "@calendar",
+  "s": "The first day of the school week is ___.",
+  "t": 3
+ },
+ {
+  "w": "Tuesday",
+  "p": "@calendar",
+  "s": "___ comes after Monday.",
+  "t": 3
+ },
+ {
+  "w": "Wednesday",
+  "p": "@calendar",
+  "s": "___ is in the middle of the week.",
+  "t": 3
+ },
+ {
+  "w": "Thursday",
+  "p": "@calendar",
+  "s": "___ comes before Friday.",
+  "t": 3
+ },
+ {
+  "w": "Friday",
+  "p": "@calendar",
+  "s": "___ is the last school day.",
+  "t": 3
+ },
+ {
+  "w": "Saturday",
+  "p": "@calendar",
+  "s": "I play at home on ___.",
+  "t": 3
+ },
+ {
+  "w": "Sunday",
+  "p": "@calendar",
+  "s": "___ is the last day of the week.",
+  "t": 3
+ }
+]

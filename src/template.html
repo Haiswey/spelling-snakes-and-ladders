@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#69c8ff">
+<title>Spelling Snakes and Ladders</title>
+<style>
+/*CSS*/
+</style>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <svg class="cloud c1" viewBox="0 0 200 80"><path d="M40 70a28 28 0 0 1 4-55 40 40 0 0 1 76-8 34 34 0 0 1 52 28 22 22 0 0 1-6 35z"/></svg>
+  <svg class="cloud c2" viewBox="0 0 200 80"><path d="M40 70a28 28 0 0 1 4-55 40 40 0 0 1 76-8 34 34 0 0 1 52 28 22 22 0 0 1-6 35z"/></svg>
+  <svg class="cloud c3" viewBox="0 0 200 80"><path d="M40 70a28 28 0 0 1 4-55 40 40 0 0 1 76-8 34 34 0 0 1 52 28 22 22 0 0 1-6 35z"/></svg>
+  <svg class="hill" viewBox="0 0 1200 220" preserveAspectRatio="none" height="22%" width="100%">
+    <path d="M0 120C150 40 300 40 450 110S750 190 900 110 1100 50 1200 100V220H0z" fill="#9be07a"/>
+    <path d="M0 160C200 100 350 110 520 150S850 200 1000 150 1150 120 1200 150V220H0z" fill="#6fcf62"/>
+  </svg>
+</div>
+
+<!-- ============ START ============ -->
+<section id="start" class="screen on">
+  <div class="hero">
+    <div class="brandmark"><img class="ico" data-i="snake" alt=""><img class="ico" data-i="die" alt=""><img class="ico" data-i="ladder" alt=""></div>
+    <h1 class="title">Spelling <span>Snakes</span> &amp; <span>Ladders</span></h1>
+    <p class="tag">Roll the dice, spell the word and climb to the top!</p>
+    <div class="steps">
+      <div><img class="ico" data-i="die" alt=""> Roll</div>
+      <div><img class="ico" data-i="pencil" alt=""> Spell</div>
+      <div><img class="ico" data-i="ladder" alt=""> Climb</div>
+    </div>
+
+    <div class="sheet">
+      <h2><i>1</i> What is your name?</h2>
+      <input id="name" class="field" type="text" maxlength="20" placeholder="Type your name" autocomplete="off">
+    </div>
+    <div class="sheet">
+      <h2><i>2</i> Choose your friend</h2>
+      <div class="avatars" id="avatars"></div>
+    </div>
+    <div class="sheet">
+      <h2><i>3</i> How do you want to play?</h2>
+      <div class="modes">
+        <button class="mode" data-mode="solo"><img class="ico" data-i="star" alt=""><span><b>I can do it myself</b><small>Listen, then spell. No hints.</small></span></button>
+        <button class="mode" data-mode="help"><img class="ico" data-i="help" alt=""><span><b>Help me, please</b><small>Picture, sentence, hints and letters to tap.</small></span></button>
+      </div>
+    </div>
+    <button class="btn play big" id="goBtn"><img class="ico" data-i="rocket" alt=""> Let's play!</button>
+    <div class="foot">Turn your sound on. Words come from Super Minds 1 and common high-frequency words.</div>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="game" class="screen">
+  <div class="bar">
+    <div class="logo"><img class="ico" data-i="die" alt=""><span>Snakes &amp; Ladders</span></div>
+    <div class="right">
+      <button class="iconbtn" id="muteBtn" aria-label="Sound on or off"></button>
+      <button class="iconbtn" id="quitBtn" aria-label="Back to start"><img class="ico" data-i="home" alt=""></button>
+    </div>
+  </div>
+  <div class="stage">
+    <div class="boardwrap" id="boardwrap">
+      <svg id="board" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Snakes and ladders board"></svg>
+      <div id="token"><div class="shad"></div><div class="badge"><img id="tokImg" alt=""></div></div>
+    </div>
+    <div class="side">
+      <div class="card player">
+        <div class="pface"><img id="faceImg" alt=""></div>
+        <div class="who"><b id="whoName"></b><span><img class="ico" data-i="star" alt=""> <em id="starCount" style="font-style:normal">0</em> stars</span></div>
+        <button class="switch" id="helpSwitch" role="switch" aria-checked="false"><span>Help</span><span class="track"></span></button>
+      </div>
+      <div class="card progress">
+        <div class="lbl"><span>Square <b id="sqNow">0</b></span><span>36 <img class="ico" data-i="trophy" alt="" style="height:1.3em;width:1.3em"></span></div>
+        <div class="meter"><i id="meterFill"></i></div>
+      </div>
+      <div class="card dicebox" id="diceBox">
+        <div class="scene"><div class="bounce" id="bounce"><div class="cube" id="cube"></div></div></div>
+        <div class="pad"></div>
+      </div>
+      <div class="msg" id="msg" aria-live="polite">Tap the dice to roll!</div>
+      <div class="rollwrap">
+        <button class="btn play block" id="rollBtn"><img class="ico" data-i="die" alt=""> Roll the dice</button>
+        <div class="legend">
+          <div><img class="ico" data-i="ladder" alt=""> Spell it right and climb the ladder.</div>
+          <div><img class="ico" data-i="snake" alt=""> Spell it wrong on a snake and slide down.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<div class="modal" id="quiz" role="dialog" aria-modal="true" aria-label="Spell the word">
+  <div class="quiz">
+    <div class="qtop"><span class="chipq" id="qsq">Square 1</span><span class="chipq" id="qmode"></span></div>
+    <div class="picture" id="picture"></div>
+    <button class="listen" id="listenBtn" aria-label="Hear the word"><img class="ico" data-i="speaker" alt=""></button>
+    <div class="tools">
+      <button class="pill" id="hearSent"><img class="ico" data-i="talk" alt=""> Hear a sentence</button>
+      <button class="pill solid" id="hintBtn"><img class="ico" data-i="bulb" alt=""> Hint</button>
+    </div>
+    <div class="sent" id="sent"></div>
+    <div class="slots" id="slots"></div>
+    <div id="fb" aria-live="polite"></div>
+    <div class="bank" id="bank"></div>
+    <div class="keys" id="keys"></div>
+    <div class="row">
+      <button class="btn block" id="checkBtn" style="max-width:340px"><img class="ico" data-i="check" alt=""> Check</button>
+      <button class="btn play block" id="nextBtn" style="display:none;max-width:340px">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ REWARD ============ -->
+<div id="cheer"><div class="reward"><div class="rays"></div><img class="mascot" id="cMascot" alt=""><br><div class="ribbon" id="cText">Great job!</div><div class="rstars" id="cStars"></div></div></div>
+<canvas id="confetti"></canvas>
+
+<!-- ============ END ============ -->
+<section id="end" class="screen">
+  <div class="final">
+    <img class="trophy" data-i="trophy" alt="">
+    <h1 id="endTitle">You did it!</h1>
+    <div class="stars" id="endStars"></div>
+    <div class="sheet" style="text-align:center"><div class="scoreline" id="endScore"></div></div>
+    <div class="sheet" id="missPanel" style="text-align:center">
+      <h2 style="justify-content:center"><img class="ico" data-i="biceps" alt=""> Words to practise</h2>
+      <div style="font-size:15px;color:var(--ink-2)">Tap a word to hear it spelled.</div>
+      <div class="miss" id="missList"></div>
+    </div>
+    <div class="row">
+      <button class="btn play" id="againBtn"><img class="ico" data-i="rocket" alt=""> Play again</button>
+      <button class="pill" id="copyBtn">Copy result for teacher</button>
+    </div>
+    <div class="note" id="copyNote"></div>
+  </div>
+</div>
+
+<script>
+/*JS*/
+</script>
+</body>
+</html>
