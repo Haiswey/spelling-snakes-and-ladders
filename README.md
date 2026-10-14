@@ -27,7 +27,7 @@ python src/build.py
 |---|---|
 | `src/words.json` | the word bank (word, picture, sentence, level) |
 | `src/app.js`, `style.css`, `template.html` | the game |
-| `src/imgs.json` | embedded pictures (base64) |
+| `src/imgs.json` | embedded pictures (base64 WebP), cut from the Canva sticker sheets by `src/cut_sheets.py` |
 | `src/audio/`, `audio.json` | British voice clips (edge-tts `en-GB-SoniaNeural`) |
 | `src/fonts/` | Fredoka and Playpen Sans |
 

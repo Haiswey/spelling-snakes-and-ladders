@@ -2,12 +2,20 @@
 /* ==========================================================================
    Spelling Snakes & Ladders
    Words: Super Minds 1 (Units 1-9) + high-frequency words  -> src/words.json
-   Pictures: Microsoft Fluent Emoji 3D artwork (MIT licence), embedded
+   Pictures: Canva AI-generated kawaii sticker set (src/art -> src/imgs.json), embedded
    Voice:    Microsoft edge-tts en-GB-SoniaNeural MP3s, embedded
    ========================================================================== */
 const WORDS = /*WORDS*/[];
 const IMG   = /*IMGS*/{};
 const AUDIO = /*AUDIO*/{};
+
+// Three plain interface icons drawn as vectors (the AI picture set has no speaker or tick).
+const svgIcon = body => "data:image/svg+xml;utf8," + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2a5c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`);
+const SPEAKER = '<path d="M10 25h10l14-11v36L20 39H10z" fill="#1f2a5c"/>';
+IMG.speaker = svgIcon(SPEAKER + '<path d="M43 24c4 4.500 4 11.500 0 16M49 16c8 9 8 23 0 32"/>');
+IMG.muted   = svgIcon(SPEAKER + '<path d="M44 25l14 14M58 25L44 39"/>');
+IMG.check   = svgIcon('<path d="M12 34l14 14L52 16" stroke-width="9"/>');
 
 const N = 36, COLS = 6;
 const LADDERS = {2:14, 8:20, 6:18};     // bottom -> top
@@ -15,7 +23,7 @@ const SNAKES  = {35:24, 28:10, 31:19};  // head -> tail
 const AVATARS = ["a_fox","a_panda","a_tiger","a_rabbit","a_unicorn","a_monkey","a_penguin","a_hamster"];
 const AVATAR_NAMES = {a_fox:"Fox",a_panda:"Panda",a_tiger:"Tiger",a_rabbit:"Rabbit",a_unicorn:"Unicorn",a_monkey:"Monkey",a_penguin:"Penguin",a_hamster:"Hamster"};
 const PRAISE  = ["Great job!","Awesome!","Super speller!","Brilliant!","Well done!","Fantastic!","You did it!","Excellent!"];
-const MASCOTS = ["m_owl","a_unicorn","a_panda","a_tiger","a_monkey","a_fox","a_rabbit","m_lion","m_bear"];
+const MASCOTS = ["m_owl","a_unicorn","a_panda","a_tiger","a_monkey","a_fox","a_rabbit","a_penguin","a_hamster"];
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, txt) => { const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; };
