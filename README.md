@@ -10,6 +10,11 @@ Pupils roll a 3D dice, spell the word they hear, and climb to the top. Works off
 - **Help me, please**: picture, written sentence, first letter, a Hint button and letters to tap.
 - Spell right: stars, praise and confetti, and ladders take you up. Spell wrong on a snake and you slide down.
 
+## Also in the game
+- **Learn the words first** (home page): flashcards by topic with picture, word, sound, a sentence and a letter-by-letter spell-aloud.
+- **Play with the computer**: choose an opponent and a level (Easy, Medium, Tricky). Take turns; first to square 36 wins.
+- **Listening check**: add `#check` to the link to play and flag every voice clip.
+
 ## Words
 114 words from Super Minds 1 (Units 1-9 vocabulary) plus common high-frequency words, in three levels (short to long). See `src/words.json`.
 
@@ -29,7 +34,8 @@ python src/build.py
 | `src/app.js`, `style.css`, `template.html` | the game |
 | `src/imgs.json` | embedded pictures (base64 WebP), cut from the Canva sticker sheets by `src/cut_sheets.py` |
 | `src/audio/`, `audio.json` | British voice clips (edge-tts `en-GB-SoniaNeural`) |
-| `src/fonts/` | Fredoka and Playpen Sans |
+| `src/fonts/` | Fredoka (interface) and Syazalina83 (school handwriting font for the words) |
+| `src/trim.json` | where the speech starts and ends in each clip, so no silence is played |
 
 ## Credits
 See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

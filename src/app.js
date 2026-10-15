@@ -8,6 +8,7 @@
 const WORDS = /*WORDS*/[];
 const IMG   = /*IMGS*/{};
 const AUDIO = /*AUDIO*/{};
+const TRIM  = /*TRIM*/{};
 
 // Three plain interface icons drawn as vectors (the AI picture set has no speaker or tick).
 const svgIcon = body => "data:image/svg+xml;utf8," + encodeURIComponent(
@@ -16,6 +17,8 @@ const SPEAKER = '<path d="M10 25h10l14-11v36L20 39H10z" fill="#1f2a5c"/>';
 IMG.speaker = svgIcon(SPEAKER + '<path d="M43 24c4 4.500 4 11.500 0 16M49 16c8 9 8 23 0 32"/>');
 IMG.muted   = svgIcon(SPEAKER + '<path d="M44 25l14 14M58 25L44 39"/>');
 IMG.check   = svgIcon('<path d="M12 34l14 14L52 16" stroke-width="9"/>');
+IMG.next = svgIcon('<path d="M24 12l20 20-20 20" stroke-width="9"/>');
+IMG.prev = svgIcon('<path d="M40 12L20 32l20 20" stroke-width="9"/>');
 
 const $ = id => document.getElementById(id);
 const N = 36, COLS = 6;
@@ -45,7 +48,7 @@ let muted = store.get("ssl_muted") === "1";
    SOUND: recorded British voice (edge-tts) + small WebAudio effects
    ========================================================================== */
 const Voice = (() => {
-  const urls = {}; let cur = null, ticket = 0;
+  const urls = {}; let cur = null, ticket = 0, curDone = null;
   const url = k => {
     if(!AUDIO[k]) return null;
     if(!urls[k]){
@@ -55,18 +58,33 @@ const Voice = (() => {
     }
     return urls[k];
   };
-  const stop = () => { ticket++; if(cur){ try{ cur.pause(); }catch(e){} cur = null; } };
-  const one = k => new Promise(res => {
+  const stop = () => { ticket++; if(curDone) curDone(); cur = null; };
+  // plays only the spoken part of a clip (TRIM = [start, end] seconds measured from the recording), so there is no dead air
+  const one = (k, onStart) => new Promise(res => {
     const u = url(k); if(muted || !u) return res();
-    const a = new Audio(u); cur = a;
-    a.onended = a.onerror = () => res();
-    a.play().catch(() => res());
+    const a = new Audio(); a.preload = "auto"; a.src = u; cur = a;
+    const [s, e] = TRIM[k] || [0, 0]; let timer = 0, finished = false;
+    const done = () => { if(finished) return; finished = true; clearTimeout(timer); try{ a.pause(); }catch(_){} if(curDone === done) curDone = null; res(); };
+    curDone = done; a.onended = a.onerror = done;
+    a.addEventListener("loadedmetadata", () => {
+      if(s) a.currentTime = s;
+      a.play().then(() => { if(onStart) onStart(); if(e) timer = setTimeout(done, Math.max(80, (e - s)*1000)); }).catch(done);
+    }, {once:true});
   });
-  async function seq(keys, gap=140){
+  async function seq(keys, gap=140, onStep){
     stop(); const mine = ticket;
-    for(const k of keys){ if(mine !== ticket) return; await one(k); if(gap) await sleep(gap); }
+    for(let i=0;i<keys.length;i++){
+      if(mine !== ticket) return;
+      await one(keys[i], onStep ? () => onStep(i) : null);
+      if(gap && mine === ticket) await sleep(gap);
+    }
   }
-  return { say: k => seq([k],0), seq, stop };
+  // say the word, spell it letter by letter (letter names), say it again; onLetter(i) fires as each letter starts
+  const spell = (word, onLetter) => {
+    const w = slug(word), L = [...word.toLowerCase()].filter(c => /[a-z]/.test(c));
+    return seq(["w_"+w, ...L.map(c => "l_"+c), "w_"+w], 260, i => { if(onLetter) onLetter(i >= 1 && i <= L.length ? i-1 : -1); });
+  };
+  return { say: k => seq([k],0), seq, spell, stop };
 })();
 
 let actx = null;
@@ -167,40 +185,77 @@ function drawBoard(){
 /* ==========================================================================
    STATE + START SCREEN
    ========================================================================== */
-const S = { name:"", avatar:AVATARS[0], helper:false, pos:0, stars:0, right:0, asked:0, streak:0, missed:[], used:new Set(), busy:false };
-let pendingMode = store.get("ssl_mode") || "solo";
+const CPU_NAMES = {a_fox:"Foxy",a_panda:"Panda",a_tiger:"Tigger",a_rabbit:"Bunny",a_unicorn:"Sparkle",a_monkey:"Momo",a_penguin:"Pingu",a_hamster:"Hammy"};
+const LEVELS = {easy:.55, medium:.78, hard:.92};            // chance that the computer spells a short word correctly
+const TIER_FACTOR = {1:1, 2:.93, 3:.85};
+const S = { name:"", avatar:AVATARS[0], helper:false, pos:0, stars:0, right:0, asked:0, streak:0, missed:[], used:new Set(), busy:false, opp:null, winner:null };
+let pendingMode   = store.get("ssl_mode") || "solo";
 let pendingAvatar = AVATARS.includes(store.get("ssl_avatar")) ? store.get("ssl_avatar") : AVATARS[0];
+let pendingPlay   = store.get("ssl_play") === "cpu" ? "cpu" : "alone";
+let pendingOpp    = AVATARS.includes(store.get("ssl_opp")) ? store.get("ssl_opp") : "a_panda";
+let pendingLevel  = LEVELS[store.get("ssl_level")] ? store.get("ssl_level") : "medium";
 
 function show(id){ document.querySelectorAll(".screen").forEach(s => s.classList.toggle("on", s.id===id)); window.scrollTo(0,0); }
 
 (function initStart(){
   $("name").value = store.get("ssl_name") || "";
-  const box = $("avatars");
-  AVATARS.forEach(a => {
-    const b = el("button","av"+(a===pendingAvatar?" sel":"")); b.innerHTML = ico(a,""); b.setAttribute("aria-label",AVATAR_NAMES[a]);
-    b.onclick = () => { pendingAvatar = a; [...box.children].forEach(c => c.classList.toggle("sel",c===b)); sfx.tap(); };
-    box.appendChild(b);
-  });
-  const ms = [...document.querySelectorAll(".mode")];
-  const sync = () => ms.forEach(m => m.classList.toggle("sel", m.dataset.mode===pendingMode));
-  ms.forEach(m => m.onclick = () => { pendingMode = m.dataset.mode; sync(); sfx.tap(); });
+  const picker = (boxId, current, onPick) => {
+    const box = $(boxId); box.innerHTML = "";
+    AVATARS.forEach(a => {
+      const b = el("button","av"+(a===current()?" sel":"")); b.innerHTML = ico(a,""); b.setAttribute("aria-label",AVATAR_NAMES[a]); b.dataset.a = a;
+      b.onclick = () => { onPick(a); sfx.tap(); syncAvatars(); };
+      box.appendChild(b);
+    });
+  };
+  const syncAvatars = () => {
+    [...$("avatars").children].forEach(c => c.classList.toggle("sel", c.dataset.a===pendingAvatar));
+    [...$("oppAvatars").children].forEach(c => { c.classList.toggle("sel", c.dataset.a===pendingOpp); c.classList.toggle("taken", c.dataset.a===pendingAvatar); c.disabled = c.dataset.a===pendingAvatar; });
+  };
+  picker("avatars", () => pendingAvatar, a => { pendingAvatar = a; if(pendingOpp===a) pendingOpp = AVATARS.find(x => x!==a); });
+  picker("oppAvatars", () => pendingOpp, a => { pendingOpp = a; });
+  const sync = () => {
+    document.querySelectorAll(".mode").forEach(m => m.classList.toggle("sel", m.dataset.mode===pendingMode));
+    document.querySelectorAll(".with").forEach(m => m.classList.toggle("sel", m.dataset.play===pendingPlay));
+    document.querySelectorAll(".lv").forEach(m => m.classList.toggle("sel", m.dataset.level===pendingLevel));
+    $("oppBox").hidden = pendingPlay !== "cpu";
+    syncAvatars();
+  };
+  document.querySelectorAll(".mode").forEach(m => m.onclick = () => { pendingMode = m.dataset.mode; sync(); sfx.tap(); });
+  document.querySelectorAll(".with").forEach(m => m.onclick = () => { pendingPlay = m.dataset.play; sync(); sfx.tap(); });
+  document.querySelectorAll(".lv").forEach(m => m.onclick = () => { pendingLevel = m.dataset.level; sync(); sfx.tap(); });
+  if(pendingOpp===pendingAvatar) pendingOpp = AVATARS.find(x => x!==pendingAvatar);
   sync();
   $("goBtn").onclick = startGame;
+  $("studyBtn").onclick = () => openStudy();
   $("name").addEventListener("keydown", e => { if(e.key==="Enter") startGame(); });
   $("name").addEventListener("input", () => $("name").classList.remove("err"));
 })();
+
+let T = [];                                   // board tokens: T[0] = pupil, T[1] = computer
+function makeTokens(){
+  $("bi").querySelectorAll(".token").forEach(n => n.remove()); T = [];
+  const mkTok = (i, avatar) => {
+    const t = el("div","token t"+i); t.innerHTML = '<div class="shad"></div><div class="badge"><img alt=""></div>';
+    t.querySelector("img").src = IMG[avatar]; $("bi").appendChild(t); T.push(t);
+  };
+  mkTok(0, S.avatar); if(S.opp) mkTok(1, S.opp.avatar);
+}
 
 function startGame(){
   ac();
   const nm = $("name").value.trim();
   if(!nm){ $("name").classList.add("err"); $("name").focus(); return; }
-  Object.assign(S,{ name:nm, avatar:pendingAvatar, helper:pendingMode==="help", pos:0, stars:0, right:0, asked:0, streak:0, missed:[], used:new Set(), busy:false });
+  const cpu = pendingPlay === "cpu";
+  Object.assign(S,{ name:nm, avatar:pendingAvatar, helper:pendingMode==="help", pos:0, stars:0, right:0, asked:0, streak:0, missed:[], used:new Set(), busy:false, winner:null,
+                    opp: cpu ? {avatar:pendingOpp, name:CPU_NAMES[pendingOpp], level:pendingLevel, pos:0} : null });
   store.set("ssl_name",nm); store.set("ssl_mode",pendingMode); store.set("ssl_avatar",pendingAvatar);
-  drawBoard();
-  $("whoName").textContent = nm;
-  $("faceImg").src = IMG[S.avatar]; $("tokImg").src = IMG[S.avatar];
-  placeToken(0,false);
-  updateHUD();
+  store.set("ssl_play",pendingPlay); store.set("ssl_opp",pendingOpp); store.set("ssl_level",pendingLevel);
+  drawBoard(); makeTokens();
+  $("whoName").textContent = nm; $("faceImg").src = IMG[S.avatar];
+  $("pCpu").hidden = !S.opp; $("meter2").hidden = !S.opp;
+  if(S.opp){ $("oppName").textContent = S.opp.name; $("oppFace").src = IMG[S.opp.avatar]; }
+  placeToken(0,0,false); if(S.opp) placeToken(1,0,false);
+  updateHUD(); setTurn(0);
   setMsg("Tap the dice to roll!");
   $("rollBtn").disabled = false;
   show("game");
@@ -208,41 +263,65 @@ function startGame(){
 }
 
 function setMsg(html){ $("msg").innerHTML = html; }
+function setTurn(i){
+  $("pHuman").classList.toggle("turn", i===0); $("pCpu").classList.toggle("turn", i===1);
+  T.forEach((t,k) => t.style.zIndex = k===i ? 6 : 5);
+}
 function updateHUD(){
   $("starCount").textContent = S.stars;
   $("helpSwitch").setAttribute("aria-checked", S.helper ? "true" : "false");
-  $("muteBtn").innerHTML = ico(muted ? "muted" : "speaker");
+  $("muteBtn").innerHTML = $("studyMute").innerHTML = ico(muted ? "muted" : "speaker");
   $("sqNow").textContent = S.pos;
   $("meterFill").style.width = (S.pos/N*100)+"%";
+  if(S.opp){ $("oppSq").textContent = "Square "+S.opp.pos; $("meterFill2").style.width = (S.opp.pos/N*100)+"%"; }
 }
 $("helpSwitch").onclick = () => { if(S.busy) return; S.helper = !S.helper; updateHUD(); sfx.tap(); };
 $("muteBtn").onclick = () => { muted = !muted; store.set("ssl_muted", muted?"1":"0"); if(muted) Voice.stop(); updateHUD(); };
 $("quitBtn").onclick = () => { if(confirm("Go back to the start?")){ Voice.stop(); show("start"); } };
 
-/* ---------- token ---------- */
-function placeToken(n, animate=true, slow=false){
-  const t = $("token"), c = n===0 ? {x:50,y:552} : cellCenter(n);
+/* ---------- tokens (the badge is centred exactly on the middle of its square) ---------- */
+const posOf = i => i===0 ? S.pos : S.opp.pos;
+function placeToken(i, n, animate=true, slow=false){
+  const t = T[i], c = n===0 ? {x:50,y:552} : cellCenter(n);
   t.classList.toggle("slide", slow);
   if(!animate) t.style.transition = "none";
   t.style.left = (c.x/6)+"%"; t.style.top = (c.y/6)+"%";
   if(!animate){ void t.offsetWidth; t.style.transition = ""; }
+  spread();
 }
-async function hopTo(from,to){
+function spread(){                              // two pupils on one square stand side by side
+  const same = !!S.opp && S.pos === S.opp.pos;
+  T.forEach((t,i) => t.style.setProperty("--ox", same ? (i===0 ? "-32%" : "32%") : "0%"));
+}
+async function hopTo(i, from, to){
   for(let n=from+1;n<=to;n++){
-    const t = $("token"); t.classList.remove("hop"); void t.offsetWidth; t.classList.add("hop");
-    placeToken(n); sfx.hop(); S.pos = n; updateHUD(); await sleep(400);
+    const t = T[i]; t.classList.remove("hop"); void t.offsetWidth; t.classList.add("hop");
+    if(i===0) S.pos = n; else S.opp.pos = n;
+    placeToken(i,n); sfx.hop(); updateHUD(); await sleep(400);
   }
+}
+async function slideTo(i, to){
+  placeToken(i,to,true,true); await sleep(1300);
+  if(i===0) S.pos = to; else S.opp.pos = to;
+  spread(); updateHUD();
 }
 
 /* ==========================================================================
-   TURN
+   TURNS
    ========================================================================== */
 $("rollBtn").onclick = roll;
 $("diceBox").onclick = roll;
 async function roll(){
   if(S.busy) return; S.busy = true; ac();
   $("rollBtn").disabled = true;
-  setMsg("Rolling…");
+  if(await humanTurn()) return;
+  if(S.opp && await cpuTurn()) return;
+  S.busy = false; $("rollBtn").disabled = false; setTurn(0);
+  setMsg("Your turn! Tap the dice.");
+}
+
+async function humanTurn(){
+  setTurn(0); setMsg("Rolling…");
   const v = 1+Math.floor(Math.random()*6);
   sfx.roll();
   await Dice3D.roll(v);
@@ -250,18 +329,17 @@ async function roll(){
   Voice.say("n_"+v);
   await sleep(1400);
   const from = S.pos, to = Math.min(N, from+v);
-  await hopTo(from,to);
-  if(to===N) return finish();
+  await hopTo(0, from, to);
+  if(to===N){ S.winner = "me"; await finish(); return true; }
   await landOn(to);
-  S.busy = false; $("rollBtn").disabled = false;
-  setMsg("Your turn! Tap the dice.");
+  return false;
 }
 
 async function landOn(sq){
   setMsg("Spell the word! "+ico("pencil"));
   await sleep(250);
   const w = pickWord(sq);
-  const r = await askWord(w);
+  const r = await askWord(w, sq);
   S.asked++;
   const stars = r.ok ? (r.tries===1 && r.hints===0 ? 3 : (r.tries===1 || r.hints===0) ? 2 : 1) : 0;
   if(r.ok){
@@ -269,15 +347,39 @@ async function landOn(sq){
     await cheer(stars);
     if(LADDERS[sq]){
       setMsg(ico("ladder")+" A ladder! Up you go!"); sfx.up(); Voice.say("say_ladder"); await sleep(600);
-      placeToken(LADDERS[sq],true,true); await sleep(1300); S.pos = LADDERS[sq]; updateHUD();
+      await slideTo(0, LADDERS[sq]);
     }
   } else {
     S.streak = 0; S.missed.push(w.w);
     if(SNAKES[sq]){
       setMsg(ico("snake")+" Oh no! A snake! Slide down!"); sfx.down(); Voice.say("say_snake"); await sleep(600);
-      placeToken(SNAKES[sq],true,true); await sleep(1300); S.pos = SNAKES[sq]; updateHUD();
+      await slideTo(0, SNAKES[sq]);
     } else { setMsg("Never mind. Next time! "+ico("biceps")); await sleep(900); }
   }
+}
+
+// the computer takes a turn: rolls, moves, "spells" (a chance of being right that depends on its level and the word) and may climb or slide
+async function cpuTurn(){
+  const o = S.opp;
+  setTurn(1); setMsg(`${o.name}'s turn`); await sleep(1000);
+  setMsg(`${o.name} is rolling…`);
+  const v = 1+Math.floor(Math.random()*6);
+  sfx.roll(); await Dice3D.roll(v);
+  setMsg(`${o.name} rolled <span class="rollnum">${v}</span>`); await sleep(1300);
+  const from = o.pos, to = Math.min(N, from+v);
+  await hopTo(1, from, to);
+  if(to===N){ S.winner = "cpu"; await finish(); return true; }
+  const w = pickWord(to);
+  setMsg(`${o.name} is spelling… ${ico("pencil")}`); await sleep(2000);
+  const ok = Math.random() < LEVELS[o.level] * (TIER_FACTOR[w.t] || 1);
+  if(ok){
+    setMsg(`${o.name} spelled it right!`); sfx.good(); await sleep(1300);
+    if(LADDERS[to]){ setMsg(ico("ladder")+` ${o.name} climbs a ladder!`); sfx.up(); await sleep(500); await slideTo(1, LADDERS[to]); }
+  } else {
+    setMsg(`${o.name} did not get that one.`); sfx.bad(); await sleep(1300);
+    if(SNAKES[to]){ setMsg(ico("snake")+` ${o.name} slides down a snake!`); sfx.down(); await sleep(500); await slideTo(1, SNAKES[to]); }
+  }
+  return false;
 }
 
 function pickWord(sq){
@@ -297,10 +399,10 @@ function pickWord(sq){
 const KB = ["qwertyuiop","asdfghjkl","zxcvbnm"];
 let Q = null;
 
-function askWord(word){
+function askWord(word, sq){
   return new Promise(resolve => {
     const letters = [...word.w];
-    Q = { word, letters, target:word.w.toLowerCase(), slots:letters.map(()=>null), locked:letters.map(()=>false),
+    Q = { word, sq, letters, target:word.w.toLowerCase(), slots:letters.map(()=>null), locked:letters.map(()=>false),
           tries:0, hints:0, done:false, resolve, tiles:[], tileAt:{}, helper:S.helper, result:null };
     renderQuiz(); $("quiz").classList.add("on");
     setTimeout(() => Voice.say("w_"+slug(word.w)), 450);
@@ -309,7 +411,7 @@ function askWord(word){
 
 function renderQuiz(){
   const {word, helper} = Q;
-  $("qsq").textContent = "Square "+S.pos;
+  $("qsq").textContent = "Square "+Q.sq;
   $("qmode").innerHTML = helper ? ico("help")+" With help" : ico("star")+" By myself";
   const pic = $("picture"); pic.innerHTML = "";
   const hasPic = helper && word.p;
@@ -420,8 +522,8 @@ function check(){
       Q.slots = [...Q.target]; drawSlots();
       [...document.querySelectorAll("#slots .slot")].forEach((s,i) => { s.classList.add("ok"); s.textContent = Q.letters[i]; });
       $("fb").className = "bad"; $("fb").textContent = `The word is “${Q.word.w}”. Let's remember it!`;
-      const k = slug(Q.word.w);
-      Voice.seq(["w_"+k, ...[...Q.target].filter(c => /[a-z]/.test(c)).map(c => "l_"+c), "w_"+k], 120);
+      const els = [...document.querySelectorAll("#slots .slot")];
+      Voice.spell(Q.word.w, i => els.forEach((s,j) => s.classList.toggle("say", j===i)));
       $("checkBtn").style.display = "none"; $("nextBtn").style.display = "";
       Q.result = {ok:false, tries:Q.tries, hints:Q.hints};
     }, 750);
@@ -493,18 +595,21 @@ function confetti(count=120){
    FINISH
    ========================================================================== */
 async function finish(){
-  setMsg(ico("trophy")+" You reached the top!");
-  sfx.win(); Voice.say("say_win"); confetti(230);
-  await sleep(1500); confetti(160); await sleep(1300);
+  const cpuWon = S.winner === "cpu", opp = S.opp;
+  setMsg(ico("trophy")+(cpuWon ? ` ${opp.name} reached the top!` : " You reached the top!"));
+  if(cpuWon) sfx.good(); else { sfx.win(); Voice.say("say_win"); }
+  confetti(cpuWon ? 90 : 230);
+  await sleep(1500); if(!cpuWon) confetti(160); await sleep(1300);
   const acc = S.asked ? Math.round(100*S.right/S.asked) : 100;
-  $("endTitle").textContent = `Well done, ${S.name}!`;
+  $("endTitle").textContent = cpuWon ? `${opp.name} won this time!` : opp ? `You beat ${opp.name}, ${S.name}!` : `Well done, ${S.name}!`;
   $("endStars").innerHTML = starsHtml(acc>=90 ? 3 : acc>=60 ? 2 : 1);
-  $("endScore").innerHTML = `You spelled <b>${S.right}</b> out of <b>${S.asked}</b> words right.<br>${ico("star")} ${S.stars} stars collected`;
+  $("endScore").innerHTML = (cpuWon ? "Good try! Play again to catch up.<br>" : "") +
+    `You spelled <b>${S.right}</b> out of <b>${S.asked}</b> words right.<br>${ico("star")} ${S.stars} stars collected`;
   const list = $("missList"); list.innerHTML = "";
   $("missPanel").style.display = S.missed.length ? "" : "none";
   S.missed.forEach(w => {
     const b = el("button","",w);
-    b.onclick = () => { ac(); const k = slug(w); Voice.seq(["w_"+k, ...[...w.toLowerCase()].filter(c => /[a-z]/.test(c)).map(c => "l_"+c), "w_"+k], 120); };
+    b.onclick = () => { ac(); Voice.spell(w); };
     list.appendChild(b);
   });
   $("copyNote").textContent = "";
@@ -517,3 +622,99 @@ $("copyBtn").onclick = async () => {
   try{ await navigator.clipboard.writeText(txt); $("copyNote").textContent = "Copied! Paste it to your teacher."; }
   catch(e){ $("copyNote").textContent = txt; }
 };
+
+/* ==========================================================================
+   STUDY: flashcards so pupils can learn the words before playing
+   ========================================================================== */
+const GROUPS = [
+  {id:"numbers",title:"Numbers",pic:"n5"}, {id:"colours",title:"Colours",pic:"picture"}, {id:"school",title:"School things",pic:"notebook"},
+  {id:"toys",title:"Toys",pic:"kite"}, {id:"animals",title:"Animals",pic:"cat"}, {id:"food",title:"Food",pic:"pizza"},
+  {id:"clothes",title:"Clothes",pic:"jacket"}, {id:"body",title:"My body",pic:"hand"}, {id:"home",title:"Home",pic:"house"},
+  {id:"beach",title:"At the beach",pic:"beach"}, {id:"days",title:"Days of the week",pic:"calendar"}, {id:"people",title:"People",pic:"mum"},
+  {id:"common",title:"Everyday words",pic:"star"}
+];
+let deck = [], di = 0;
+
+function openStudy(){ buildGroups(); $("studyGroups").hidden = false; $("studyDeck").hidden = true; $("studyTitle").textContent = "Learn the words"; show("study"); }
+function buildGroups(){
+  const box = $("studyGroups"); box.innerHTML = "";
+  const tile = (g, count, onClick) => {
+    const b = el("button","gtile"); b.innerHTML = `<span class="gpic">${ico(g.pic,"")}</span><b>${g.title}</b><small>${count} words</small>`;
+    b.onclick = () => { sfx.tap(); onClick(); }; box.appendChild(b);
+  };
+  GROUPS.forEach(g => { const ws = WORDS.filter(w => w.g===g.id); tile(g, ws.length, () => openDeck(g.title, ws)); });
+  tile({title:"All the words", pic:"trophy"}, WORDS.length, () => openDeck("All the words", WORDS));
+}
+function openDeck(title, words){
+  deck = words.slice(); di = 0;
+  $("studyGroups").hidden = true; $("studyDeck").hidden = false; $("studyTitle").textContent = title;
+  showCard(0); window.scrollTo(0,0);
+}
+function showCard(dir){
+  const w = deck[di], card = $("fcard");
+  card.classList.remove("in-l","in-r"); void card.offsetWidth; if(dir) card.classList.add(dir>0 ? "in-r" : "in-l");
+  const pic = $("fpic"); pic.innerHTML = "";
+  if(w.p && w.p[0]==="#"){ const s = el("div","sw"); s.style.background = w.p; pic.appendChild(s); }
+  else { const im = el("img"); im.alt = ""; im.src = IMG[w.p ? w.p.slice(1) : "talk"]; pic.appendChild(im); }
+  const fw = $("fword"); fw.innerHTML = ""; [...w.w].forEach(c => fw.appendChild(el("i","",c)));
+  $("fsent").innerHTML = w.s.replace("___", `<b>${w.w}</b>`);
+  $("deckCount").textContent = `${di+1} of ${deck.length}`;
+  $("deckFill").style.width = ((di+1)/deck.length*100)+"%";
+  $("prevCard").disabled = di===0;
+  $("nextCard").innerHTML = di===deck.length-1 ? ico("rocket")+" Ready to play!" : "Next "+ico("next");
+  $("nextCard").classList.toggle("go", di===deck.length-1);
+  setTimeout(() => { if(deck[di]===w) Voice.say("w_"+slug(w.w)); }, 300);
+}
+function stepCard(d){
+  if(d>0 && di===deck.length-1){ Voice.stop(); show("start"); $("name").focus(); return; }
+  const n = di+d; if(n<0 || n>=deck.length) return; di = n; showCard(d);
+}
+$("prevCard").onclick = () => stepCard(-1);
+$("nextCard").onclick = () => stepCard(1);
+$("hearCard").onclick = () => { ac(); Voice.say("w_"+slug(deck[di].w)); };
+$("sentCard").onclick = () => { ac(); Voice.say("d_"+slug(deck[di].w)); };
+$("spellCard").onclick = () => {
+  ac(); const is = [...$("fword").children];
+  Voice.spell(deck[di].w, i => is.forEach((x,k) => x.classList.toggle("say", k===i)));
+};
+$("studyBack").onclick = () => { Voice.stop(); if(!$("studyDeck").hidden){ $("studyDeck").hidden = true; $("studyGroups").hidden = false; $("studyTitle").textContent = "Learn the words"; } else show("start"); };
+$("studyMute").onclick = () => $("muteBtn").onclick();
+document.addEventListener("keydown", e => {
+  if(!$("study").classList.contains("on") || $("studyDeck").hidden) return;
+  if(e.key==="ArrowRight") stepCard(1); else if(e.key==="ArrowLeft") stepCard(-1);
+  else if(e.key===" " || e.key==="Enter"){ e.preventDefault(); $("hearCard").click(); }
+});
+(function swipe(){
+  let x0 = null; const c = $("fcard");
+  c.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, {passive:true});
+  c.addEventListener("touchend", e => { if(x0===null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 50) stepCard(dx<0 ? 1 : -1); });
+})();
+
+/* ==========================================================================
+   LISTENING CHECK: open the game link with  #check  on the end to play and flag every clip
+   ========================================================================== */
+function openCheck(){
+  const root = $("checkList"); root.innerHTML = ""; const flagged = new Set();
+  const sentence = {}; WORDS.forEach(w => { sentence[slug(w.w)] = w.s.replace("___", w.w); });
+  const groups = [
+    ["Letter names (spelling out)", k => k.startsWith("l_"), k => k.slice(2).toUpperCase()],
+    ["Words", k => k.startsWith("w_"), k => WORDS.find(w => slug(w.w)===k.slice(2)).w],
+    ["Word in a sentence", k => k.startsWith("d_"), k => sentence[k.slice(2)]],
+    ["Dice, praise and game lines", k => /^(n_|p_|say_)/.test(k), k => k],
+  ];
+  groups.forEach(([title, test, label]) => {
+    const h = el("h3","",title); root.appendChild(h); const box = el("div","chk");
+    Object.keys(AUDIO).filter(test).forEach(k => {
+      const row = el("div","crow"); const play = el("button","pill small"); play.innerHTML = ico("speaker")+" "+label(k);
+      play.onclick = () => { ac(); Voice.say(k); };
+      const flag = el("button","flag","Wrong?"); flag.onclick = () => { flagged.has(k) ? flagged.delete(k) : flagged.add(k); flag.classList.toggle("on", flagged.has(k)); $("flagCount").textContent = flagged.size; };
+      row.append(play, flag); box.appendChild(row);
+    });
+    root.appendChild(box);
+  });
+  $("copyFlags").onclick = async () => { const t = [...flagged].join(", ") || "none flagged"; try{ await navigator.clipboard.writeText(t); $("flagNote").textContent = "Copied: "+t; }catch(e){ $("flagNote").textContent = t; } };
+  $("checkBack").onclick = () => { Voice.stop(); location.hash = ""; show("start"); };
+  show("check");
+}
+if(location.hash === "#check") openCheck();
+window.addEventListener("hashchange", () => { if(location.hash === "#check") openCheck(); });

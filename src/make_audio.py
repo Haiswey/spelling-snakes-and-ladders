@@ -20,8 +20,9 @@ clips = {}
 for e in json.load(open(os.path.join(here, 'words.json'), encoding='utf8')):
     clips['w_' + slug(e['w'])] = f"{e['w']}."
     clips['d_' + slug(e['w'])] = f"{e['w']}. {e['s'].replace('___', e['w'])} {e['w']}."
-LETTERS = dict(zip('abcdefghijklmnopqrstuvwxyz', 'ay bee see dee ee eff jee aitch eye jay kay el em en oh pee cue ar ess tee you vee double-you ex why zed'.split()))
-for k, v in LETTERS.items(): clips['l_' + k] = v.replace('-', ' ') + '.'
+# Letter names are generated from the capital letter itself ("P."), the voice's own way of saying a letter name.
+# (Respelled words such as "pee", "ee", "en" were measured to sound longer and word-like for E and N.)
+for k in 'abcdefghijklmnopqrstuvwxyz': clips['l_' + k] = k.upper() + '.'
 for i, n in enumerate(['one', 'two', 'three', 'four', 'five', 'six'], 1): clips[f'n_{i}'] = f'You rolled a {n}!'
 PRAISE = ['Great job!', 'Awesome!', 'Super speller!', 'Brilliant!', 'Well done!', 'Fantastic!', 'You did it!', 'Excellent!']
 for i, t in enumerate(PRAISE): clips[f'p_{i}'] = t
@@ -29,7 +30,7 @@ clips.update({
     'say_try': 'Oops! Try again.', 'say_remember': "Let's remember it.", 'say_ladder': 'A ladder! Up you go!',
     'say_snake': 'Oh no! A snake! Slide down.', 'say_win': 'You reached the top! Well done!',
     'say_spell': 'Spell the word.', 'say_roll': 'Roll the dice.', 'say_hint': 'Here is the next letter.',
-    'say_streak': 'Three correct answers, one after another! You are on fire!', 'say_welcome': "Let's play!",
+    'say_streak': 'Three in a row! You are on fire!', 'say_welcome': "Let's play!",
 })
 
 async def one(sem, key, text):

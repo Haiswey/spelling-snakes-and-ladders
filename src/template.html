@@ -32,6 +32,7 @@
       <div><img class="ico" data-i="pencil" alt=""> Spell</div>
       <div><img class="ico" data-i="ladder" alt=""> Climb</div>
     </div>
+    <button class="btn blue" id="studyBtn" style="margin:0 0 18px"><img class="ico" data-i="notebook" alt=""> Learn the words first</button>
 
     <div class="sheet">
       <h2><i>1</i> What is your name?</h2>
@@ -46,6 +47,23 @@
       <div class="modes">
         <button class="mode" data-mode="solo"><img class="ico" data-i="star" alt=""><span><b>I can do it myself</b><small>Listen, then spell. No hints.</small></span></button>
         <button class="mode" data-mode="help"><img class="ico" data-i="help" alt=""><span><b>Help me, please</b><small>Picture, sentence, hints and letters to tap.</small></span></button>
+      </div>
+    </div>
+    <div class="sheet">
+      <h2><i>4</i> Who do you play with?</h2>
+      <div class="modes">
+        <button class="with" data-play="alone"><img class="ico" data-i="rocket" alt=""><span><b>Just me</b><small>Race to the top on your own.</small></span></button>
+        <button class="with" data-play="cpu"><img class="ico" data-i="robot" alt=""><span><b>Play with the computer</b><small>Take turns. First to square 36 wins.</small></span></button>
+      </div>
+      <div id="oppBox" hidden>
+        <h3 class="sub">Choose your opponent</h3>
+        <div class="avatars" id="oppAvatars"></div>
+        <h3 class="sub">How good is the computer?</h3>
+        <div class="levels">
+          <button class="lv" data-level="easy">Easy</button>
+          <button class="lv" data-level="medium">Medium</button>
+          <button class="lv" data-level="hard">Tricky</button>
+        </div>
       </div>
     </div>
     <button class="btn play big" id="goBtn"><img class="ico" data-i="rocket" alt=""> Let's play!</button>
@@ -64,18 +82,26 @@
   </div>
   <div class="stage">
     <div class="boardwrap" id="boardwrap">
-      <svg id="board" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Snakes and ladders board"></svg>
-      <div id="token"><div class="shad"></div><div class="badge"><img id="tokImg" alt=""></div></div>
+      <div class="bi" id="bi">
+        <svg id="board" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Snakes and ladders board"></svg>
+      </div>
     </div>
     <div class="side">
-      <div class="card player">
+      <div class="players">
+      <div class="card player" id="pHuman">
         <div class="pface"><img id="faceImg" alt=""></div>
         <div class="who"><b id="whoName"></b><span><img class="ico" data-i="star" alt=""> <em id="starCount" style="font-style:normal">0</em> stars</span></div>
         <button class="switch" id="helpSwitch" role="switch" aria-checked="false"><span>Help</span><span class="track"></span></button>
       </div>
+      <div class="card player cpu" id="pCpu" hidden>
+        <div class="pface"><img id="oppFace" alt=""></div>
+        <div class="who"><b id="oppName"></b><span id="oppSq">Square 0</span></div>
+      </div>
+      </div>
       <div class="card progress">
         <div class="lbl"><span>Square <b id="sqNow">0</b></span><span>36 <img class="ico" data-i="trophy" alt="" style="height:1.3em;width:1.3em"></span></div>
         <div class="meter"><i id="meterFill"></i></div>
+        <div class="meter m2" id="meter2" hidden><i id="meterFill2"></i></div>
       </div>
       <div class="card dicebox" id="diceBox">
         <div class="scene"><canvas id="dice3d" aria-label="Dice"></canvas></div>
@@ -89,6 +115,46 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ STUDY ============ -->
+<section id="study" class="screen">
+  <div class="bar">
+    <button class="pill" id="studyBack"><img class="ico" data-i="prev" alt=""> Back</button>
+    <div class="stitle" id="studyTitle">Learn the words</div>
+    <button class="iconbtn" id="studyMute" aria-label="Sound on or off"></button>
+  </div>
+  <div class="groups" id="studyGroups"></div>
+  <div class="deck" id="studyDeck" hidden>
+    <div class="deckbar"><span id="deckCount">1 of 1</span><div class="meter"><i id="deckFill"></i></div></div>
+    <div class="fcard" id="fcard">
+      <div class="fpic" id="fpic"></div>
+      <div class="fword" id="fword"></div>
+      <div class="fsent" id="fsent"></div>
+      <div class="ftools">
+        <button class="pill solid" id="hearCard"><img class="ico" data-i="speaker" alt=""> Hear it</button>
+        <button class="pill" id="spellCard"><img class="ico" data-i="pencil" alt=""> Spell it</button>
+        <button class="pill" id="sentCard"><img class="ico" data-i="talk" alt=""> Sentence</button>
+      </div>
+    </div>
+    <div class="fnav">
+      <button class="btn small light" id="prevCard"><img class="ico" data-i="prev" alt=""> Back</button>
+      <button class="btn small" id="nextCard">Next</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LISTENING CHECK (add #check to the link) ============ -->
+<section id="check" class="screen">
+  <div class="final" style="max-width:760px;text-align:left">
+    <div class="bar"><button class="pill" id="checkBack"><img class="ico" data-i="prev" alt=""> Back</button><div class="stitle">Listening check</div><span></span></div>
+    <div class="sheet">
+      <p style="margin:0">Tap each button to hear it. If something sounds wrong, tap <b>Wrong?</b> next to it. Then tap <b>Copy list</b> and send the list to Claude.</p>
+      <div class="row" style="justify-content:flex-start"><button class="btn small" id="copyFlags">Copy list</button><span>Flagged: <b id="flagCount">0</b></span></div>
+      <div class="note" id="flagNote"></div>
+    </div>
+    <div class="sheet" id="checkList"></div>
   </div>
 </section>
 

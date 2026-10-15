@@ -10,7 +10,7 @@ def font(file, family, weight):
     return (f"@font-face{{font-family:'{family}';font-style:normal;font-weight:{weight};font-display:swap;"
             f"src:url(data:font/woff2;base64,{b}) format('woff2')}}\n")
 
-css = rd('style.css').replace('/*FONTFACE*/', font('Fredoka.woff2', 'Fredoka', '300 700') + font('PlaypenSans.woff2', 'Playpen Sans', '100 800'))
+css = rd('style.css').replace('/*FONTFACE*/', font('Fredoka.woff2', 'Fredoka', '300 700') + font('Syazalina83.woff', 'Syazalina83', '400'))
 words = json.load(open(os.path.join(here, 'words.json'), encoding='utf8'))
 audio_path = os.path.join(here, 'audio.json')
 audio = json.load(open(audio_path)) if os.path.exists(audio_path) else {}
@@ -19,7 +19,8 @@ imgs = json.load(open(os.path.join(here, 'imgs.json')))
 js = (rd('app.js')
       .replace('/*WORDS*/[]', json.dumps(words, separators=(',', ':'), ensure_ascii=False))
       .replace('/*IMGS*/{}', json.dumps(imgs, separators=(',', ':')))
-      .replace('/*AUDIO*/{}', json.dumps(audio, separators=(',', ':'))))
+      .replace('/*AUDIO*/{}', json.dumps(audio, separators=(',', ':')))
+      .replace('/*TRIM*/{}', json.dumps(json.load(open(os.path.join(here, 'trim.json'))), separators=(',', ':'))))
 three = open(os.path.join(here, 'vendor', 'three.min.js'), encoding='utf8').read()
 three = three[three.index('/**'):]          # drop the deprecation console.warn line
 js = js.replace('/*DICE3D*/', rd('dice3d.js'))

@@ -9,7 +9,7 @@ three.js r152, MIT License, Copyright 2010-2023 three.js authors (https://threej
 
 ## Fonts
 - Fredoka, SIL Open Font License 1.1 (https://fonts.google.com/specimen/Fredoka)
-- Playpen Sans, SIL Open Font License 1.1 (https://fonts.google.com/specimen/Playpen+Sans)
+- Syazalina83 v3, school handwriting font (freeware, copyright syazalina83, 2011), used for the words, letters and sentences. A Latin subset is embedded. The original file is kept outside the public repository (`Documentsonts`).
 
 ## Voice
 Spoken audio generated with Microsoft Edge text-to-speech (voice en-GB-SoniaNeural) using the `edge-tts` package.

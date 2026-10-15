@@ -6,3 +6,4 @@ __pycache__/
 .vercel
 .env*
 src/art/
+src/fonts/Syazalina83-v3.ttf

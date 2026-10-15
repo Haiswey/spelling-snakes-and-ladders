@@ -94,3 +94,18 @@ Purpose: next time a new tool is built, start from here instead of rediscovering
 - Live: https://spelling-snakes-and-ladders.vercel.app
 - Code: https://github.com/Haiswey/spelling-snakes-and-ladders
 - Canva scratch design "Blank white image holder" holds the 10 sticker sheets (safe to delete).
+
+## 7. Round 3 (15 Oct 2026, evening): checks that found real problems
+
+- **Dice looked fake:** a CSS cube shows gaps between faces. Replaced by an embedded three.js rounded, glossy dice; the same renderer makes the small dice icons.
+- **Vectors and cut-outs must be looked at:** hand-drawn clouds were incomplete; the ladder picture kept white inside its gaps (enclosed white areas are not removed by a border flood-fill).
+- **Token not centred in its square:** the board had padding, and the token was positioned against the padded box. Put board and tokens in one inner box. Check by measuring the pixel offset for every square (all 0 px).
+- **Voice checks, done by measuring instead of guessing:**
+  - Edge-tts cannot take IPA `<phoneme>` tags (the service returns no audio), so pronunciation cannot be forced.
+  - "Three in a row!": the sound of "row" was compared with reference clips ("roe" vs "cow") and is the correct /roh/. Original wording kept.
+  - Letter clips: all 26 were compared with a second rendering of the capital letter. E and N clips (respelled "ee", "en") were clearly longer than normal and N matched J best. That is what a teacher heard as "p, e, e, n". Regenerated every letter from the capital letter; E and N are now normal length.
+  - Every clip had about 1.3 s of silence after the speech. Measured the speech start and end of all clips (`src/trim.json`) and play only that part.
+  - Spelling out now highlights each letter as it is said (slots, flashcards).
+- **Listening check page** (`#check`): every clip with a "Wrong?" flag so the teacher can ear-check, because no automatic test replaces a human ear.
+- **New features:** flashcards (study first), computer opponent with level, school handwriting font Syazalina83 (words), explicit baseline alignment for that font (its baseline sits low).
+- **CSS gotchas hit:** `display:grid` on an element overrides the `hidden` attribute (add `[hidden]{display:none!important}`); a mobile rule hid the title used on two other screens (do not reuse `.logo span`); icons used by markup must be defined before the code that fills `data-i` images.
