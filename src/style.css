@@ -330,9 +330,17 @@ h1.title span{color:var(--sun)}
 
 .stitle{font-weight:700;font-size:clamp(18px,4.6vw,26px);color:#fff;text-shadow:0 3px 0 rgba(31,42,92,.3);text-align:center;flex:1;padding:0 8px}
 
-/* ---------- school font alignment: its baseline sits low, so place the baseline explicitly ---------- */
-.slot{--sh:clamp(62px,16vw,80px);width:clamp(40px,11vw,56px);height:var(--sh);font-size:calc(var(--sh)*.62);line-height:1;padding:calc(var(--sh)*.60 - 1.02em) 0 0;display:flex;align-items:flex-start;justify-content:center}
-.key{--kh:clamp(44px,11vw,54px);height:var(--kh);font-size:calc(var(--kh)*.62);line-height:1;padding:calc(var(--kh)*.60 - 1.02em) 0 0;display:flex;align-items:flex-start;justify-content:center}
-.bank .key{--kh:64px;width:58px;height:64px;font-size:40px;padding:calc(64px*.60 - 1.02em) 0 0}
+/* ---------- school font fit ----------
+   Syazalina83 glyphs reach 1.15em above the baseline and 0.45em below it (1.6em in all), and the baseline sits
+   1.02em below the top of a line box with line-height:1. So for a box of height H: font-size = .5H, and
+   padding-top = .164H puts the glyphs in the box with an even margin top and bottom. */
+.slot{--h:clamp(64px,17vw,84px);width:clamp(42px,11.5vw,58px);height:var(--h);font-size:calc(var(--h)*.5);line-height:1;padding:calc(var(--h)*.164) 0 0;display:flex;align-items:flex-start;justify-content:center}
+.key{--h:clamp(46px,11.5vw,56px);height:var(--h);font-size:calc(var(--h)*.5);line-height:1;padding:calc(var(--h)*.164) 0 0;display:flex;align-items:flex-start;justify-content:center}
+.bank .key{--h:66px;width:60px;height:66px}
 .key.wide{font-size:15px;padding:0;align-items:center;font-family:var(--ui);font-weight:600}
-@media (max-height:780px){ .bank .key{--kh:54px;width:50px;height:54px;font-size:34px;padding:calc(54px*.60 - 1.02em) 0 0} }
+@media (max-height:780px){ .bank .key{--h:56px;width:52px;height:56px} }
+.field{line-height:2;padding:6px 18px 12px}
+.sent{line-height:1.5;padding:8px 16px 12px}
+.fword{line-height:1.75}
+.fsent{line-height:1.6}
+.miss button{line-height:1.5;padding:4px 18px 10px}
