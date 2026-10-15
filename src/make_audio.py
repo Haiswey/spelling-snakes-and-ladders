@@ -30,16 +30,29 @@ clips.update({
     'say_try': 'Oops! Try again.', 'say_remember': "Let's remember it.", 'say_ladder': 'A ladder! Up you go!',
     'say_snake': 'Oh no! A snake! Slide down.', 'say_win': 'You reached the top! Well done!',
     'say_spell': 'Spell the word.', 'say_roll': 'Roll the dice.', 'say_hint': 'Here is the next letter.',
-    'say_streak': 'Three in a row! You are on fire!', 'say_welcome': "Let's play!",
+    'say_streak': 'Three in a roe! You are on fire!', 'say_welcome': "Let's play!",
 })
+
+# Pronunciation options (listen on the #check page and choose the best). Value = (text, voice, rate).
+OPTIONS = {
+    'x_ball_1': ('ball.', 'en-GB-SoniaNeural', '-10%'),  'x_ball_2': ('bawl.', 'en-GB-SoniaNeural', '-10%'),
+    'x_ball_3': ('boll.', 'en-GB-SoniaNeural', '-10%'),  'x_ball_4': ('ball.', 'en-GB-LibbyNeural', '-10%'),
+    'x_ball_5': ('ball.', 'en-GB-MaisieNeural', '-10%'), 'x_ball_6': ('ball.', 'en-GB-RyanNeural', '-10%'),
+    'x_row_1': ('Three in a row!', 'en-GB-SoniaNeural', '-10%'), 'x_row_2': ('Three in a roe!', 'en-GB-SoniaNeural', '-10%'),
+    'x_row_3': ('Three in a row!', 'en-GB-LibbyNeural', '-10%'), 'x_row_4': ('Three in a row!', 'en-GB-MaisieNeural', '-10%'),
+    'x_row_5': ('Three in a row!', 'en-GB-RyanNeural', '-10%'),  'x_row_6': ('Three in a row!', 'en-GB-ThomasNeural', '-10%'),
+}
+for k, v in OPTIONS.items(): clips[k] = v
 
 async def one(sem, key, text):
     path = os.path.join(OUT, key + '.mp3')
     if os.path.exists(path) and os.path.getsize(path) > 500: return
+    voice, rate = VOICE, RATE
+    if isinstance(text, tuple): text, voice, rate = text
     async with sem:
         for attempt in range(4):
             try:
-                await edge_tts.Communicate(text, VOICE, rate=RATE).save(path); return
+                await edge_tts.Communicate(text, voice, rate=rate).save(path); return
             except Exception as ex:
                 await asyncio.sleep(1 + attempt)
         print('FAILED', key)

@@ -97,12 +97,17 @@ function tone(freq, dur=.15, type="sine", vol=.2, delay=0, slideTo){
   o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+.02);
 }
 const sfx = {
-  roll(){ for(let i=0;i<12;i++) tone(300+Math.random()*500,.05,"square",.04,i*.11); },
-  hop(){ tone(520,.09,"triangle",.16); },
+  // dice: a rattle while it flies, then a "clack" exactly when it touches the table (the 3 bounces of Dice3D.roll), softer each time
+  dice(ms){
+    for(let i=0;i<14;i++) tone(260+Math.random()*420, .035, "square", .035, (i/14)*ms/1000*.9);
+    [[.3125,.26],[.625,.18],[.9375,.12],[1,.2]].forEach(([f,v]) => { const d = f*ms/1000; tone(150,.07,"square",v,d); tone(1100,.025,"triangle",v*.6,d); });
+  },
+  jump(){ tone(420,.07,"triangle",.14,0,640); },                     // takes off
+  land(last){ tone(190,.08,"sine",.28); if(last){ tone(523,.16,"triangle",.16,.04); tone(784,.2,"triangle",.14,.12); } },   // lands (the last square gets a little chime = "stop")
   good(){ [523,659,784,1047].forEach((f,i)=>tone(f,.22,"triangle",.22,i*.1)); tone(1319,.5,"sine",.18,.4); },
   bad(){ tone(220,.25,"sawtooth",.12); tone(165,.3,"sawtooth",.12,.18); },
-  up(){ for(let i=0;i<8;i++) tone(400+i*90,.1,"triangle",.18,i*.07); },
-  down(){ tone(800,.9,"sawtooth",.13,0,120); },
+  up(ms=1200){ const n=12; for(let i=0;i<n;i++) tone(330*Math.pow(2,i/6),.14,"triangle",.17,i*(ms/1000)/n); },          // climbs for as long as the ladder slide lasts
+  down(ms=1200){ tone(900,ms/1000,"sawtooth",.11,0,110); },                                                        // falls for as long as the snake slide lasts
   win(){ [523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,.25,"triangle",.25,i*.14)); },
   tap(){ tone(660,.05,"sine",.1); }
 };
@@ -252,7 +257,7 @@ function startGame(){
   store.set("ssl_play",pendingPlay); store.set("ssl_opp",pendingOpp); store.set("ssl_level",pendingLevel);
   drawBoard(); makeTokens();
   $("whoName").textContent = nm; $("faceImg").src = IMG[S.avatar];
-  $("pCpu").hidden = !S.opp; $("meter2").hidden = !S.opp;
+  $("pCpu").hidden = !S.opp; $("vsBadge").hidden = !S.opp; $("versus").classList.toggle("solo", !S.opp);
   if(S.opp){ $("oppName").textContent = S.opp.name; $("oppFace").src = IMG[S.opp.avatar]; }
   placeToken(0,0,false); if(S.opp) placeToken(1,0,false);
   updateHUD(); setTurn(0);
@@ -297,10 +302,11 @@ async function hopTo(i, from, to){
   for(let n=from+1;n<=to;n++){
     const t = T[i]; t.classList.remove("hop"); void t.offsetWidth; t.classList.add("hop");
     if(i===0) S.pos = n; else S.opp.pos = n;
-    placeToken(i,n); sfx.hop(); updateHUD(); await sleep(400);
+    placeToken(i,n); sfx.jump(); setTimeout(() => sfx.land(n===to), 340); updateHUD(); await sleep(400);
   }
 }
-async function slideTo(i, to){
+async function slideTo(i, to, kind){
+  if(kind==="up"){ sfx.up(1200); Voice.say("say_ladder"); } else if(kind==="down"){ sfx.down(1200); Voice.say("say_snake"); }
   placeToken(i,to,true,true); await sleep(1300);
   if(i===0) S.pos = to; else S.opp.pos = to;
   spread(); updateHUD();
@@ -323,8 +329,8 @@ async function roll(){
 async function humanTurn(){
   setTurn(0); setMsg("Rolling…");
   const v = 1+Math.floor(Math.random()*6);
-  sfx.roll();
-  await Dice3D.roll(v);
+  sfx.dice(1700);
+  await Dice3D.roll(v, 1700);
   setMsg(`You rolled <span class="rollnum">${v}</span>`);
   Voice.say("n_"+v);
   await sleep(1400);
@@ -346,14 +352,14 @@ async function landOn(sq){
     S.right++; S.streak++; S.stars += stars; updateHUD();
     await cheer(stars);
     if(LADDERS[sq]){
-      setMsg(ico("ladder")+" A ladder! Up you go!"); sfx.up(); Voice.say("say_ladder"); await sleep(600);
-      await slideTo(0, LADDERS[sq]);
+      setMsg(ico("ladder")+" A ladder! Up you go!"); await sleep(350);
+      await slideTo(0, LADDERS[sq], "up");
     }
   } else {
     S.streak = 0; S.missed.push(w.w);
     if(SNAKES[sq]){
-      setMsg(ico("snake")+" Oh no! A snake! Slide down!"); sfx.down(); Voice.say("say_snake"); await sleep(600);
-      await slideTo(0, SNAKES[sq]);
+      setMsg(ico("snake")+" Oh no! A snake! Slide down!"); await sleep(350);
+      await slideTo(0, SNAKES[sq], "down");
     } else { setMsg("Never mind. Next time! "+ico("biceps")); await sleep(900); }
   }
 }
@@ -364,7 +370,7 @@ async function cpuTurn(){
   setTurn(1); setMsg(`${o.name}'s turn`); await sleep(1000);
   setMsg(`${o.name} is rolling…`);
   const v = 1+Math.floor(Math.random()*6);
-  sfx.roll(); await Dice3D.roll(v);
+  sfx.dice(1700); await Dice3D.roll(v, 1700);
   setMsg(`${o.name} rolled <span class="rollnum">${v}</span>`); await sleep(1300);
   const from = o.pos, to = Math.min(N, from+v);
   await hopTo(1, from, to);
@@ -374,10 +380,10 @@ async function cpuTurn(){
   const ok = Math.random() < LEVELS[o.level] * (TIER_FACTOR[w.t] || 1);
   if(ok){
     setMsg(`${o.name} spelled it right!`); sfx.good(); await sleep(1300);
-    if(LADDERS[to]){ setMsg(ico("ladder")+` ${o.name} climbs a ladder!`); sfx.up(); await sleep(500); await slideTo(1, LADDERS[to]); }
+    if(LADDERS[to]){ setMsg(ico("ladder")+` ${o.name} climbs a ladder!`); await sleep(350); await slideTo(1, LADDERS[to], "up"); }
   } else {
     setMsg(`${o.name} did not get that one.`); sfx.bad(); await sleep(1300);
-    if(SNAKES[to]){ setMsg(ico("snake")+` ${o.name} slides down a snake!`); sfx.down(); await sleep(500); await slideTo(1, SNAKES[to]); }
+    if(SNAKES[to]){ setMsg(ico("snake")+` ${o.name} slides down a snake!`); await sleep(350); await slideTo(1, SNAKES[to], "down"); }
   }
   return false;
 }
@@ -693,6 +699,10 @@ document.addEventListener("keydown", e => {
 /* ==========================================================================
    LISTENING CHECK: open the game link with  #check  on the end to play and flag every clip
    ========================================================================== */
+const OPTION_LABEL = {
+  x_ball_1:"ball (voice Sonia, now used)", x_ball_2:"bawl (Sonia)", x_ball_3:"boll (Sonia)", x_ball_4:"ball (voice Libby)", x_ball_5:"ball (voice Maisie)", x_ball_6:"ball (voice Ryan, male)",
+  x_row_1:"Three in a row! (Sonia)", x_row_2:"Three in a roe! (Sonia, now used)", x_row_3:"Three in a row! (Libby)", x_row_4:"Three in a row! (Maisie)", x_row_5:"Three in a row! (Ryan)", x_row_6:"Three in a row! (Thomas)"
+};
 function openCheck(){
   const root = $("checkList"); root.innerHTML = ""; const flagged = new Set();
   const sentence = {}; WORDS.forEach(w => { sentence[slug(w.w)] = w.s.replace("___", w.w); });
@@ -701,13 +711,14 @@ function openCheck(){
     ["Words", k => k.startsWith("w_"), k => WORDS.find(w => slug(w.w)===k.slice(2)).w],
     ["Word in a sentence", k => k.startsWith("d_"), k => sentence[k.slice(2)]],
     ["Dice, praise and game lines", k => /^(n_|p_|say_)/.test(k), k => k],
+    ["Pronunciation options: tap Best on the one that sounds right", k => k.startsWith("x_"), k => OPTION_LABEL[k]],
   ];
   groups.forEach(([title, test, label]) => {
     const h = el("h3","",title); root.appendChild(h); const box = el("div","chk");
     Object.keys(AUDIO).filter(test).forEach(k => {
       const row = el("div","crow"); const play = el("button","pill small"); play.innerHTML = ico("speaker")+" "+label(k);
       play.onclick = () => { ac(); Voice.say(k); };
-      const flag = el("button","flag","Wrong?"); flag.onclick = () => { flagged.has(k) ? flagged.delete(k) : flagged.add(k); flag.classList.toggle("on", flagged.has(k)); $("flagCount").textContent = flagged.size; };
+      const flag = el("button","flag",k.startsWith("x_") ? "Best" : "Wrong?"); flag.onclick = () => { flagged.has(k) ? flagged.delete(k) : flagged.add(k); flag.classList.toggle("on", flagged.has(k)); $("flagCount").textContent = flagged.size; };
       row.append(play, flag); box.appendChild(row);
     });
     root.appendChild(box);

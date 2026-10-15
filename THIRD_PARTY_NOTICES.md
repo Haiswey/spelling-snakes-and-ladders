@@ -8,8 +8,7 @@ Three small interface icons (speaker, mute, tick) are hand-drawn vectors.
 three.js r152, MIT License, Copyright 2010-2023 three.js authors (https://threejs.org). Embedded unchanged in index.html.
 
 ## Fonts
-- Fredoka, SIL Open Font License 1.1 (https://fonts.google.com/specimen/Fredoka)
-- Syazalina83 v3, school handwriting font (freeware, copyright syazalina83, 2011), used for the words, letters and sentences. A Latin subset is embedded. The original file is kept outside the public repository (`Documentsonts`).
+- **Azim** (Medium and Bold), a rounded school-style font with the Malaysian letter shapes, by Zainuddin Jamil (2003). A Latin subset is embedded. The font files carry no licence text (their embedding flag allows embedding); permission from the author has not been confirmed. The original files are kept outside the public repository.
 
 ## Voice
 Spoken audio generated with Microsoft Edge text-to-speech (voice en-GB-SoniaNeural) using the `edge-tts` package.

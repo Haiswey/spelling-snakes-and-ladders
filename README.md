@@ -12,7 +12,7 @@ Pupils roll a 3D dice, spell the word they hear, and climb to the top. Works off
 
 ## Also in the game
 - **Learn the words first** (home page): flashcards by topic with picture, word, sound, a sentence and a letter-by-letter spell-aloud.
-- **Play with the computer**: choose an opponent and a level (Easy, Medium, Tricky). Take turns; first to square 36 wins.
+- **Play with the computer**: choose an opponent and a level (Easy, Medium, Tricky). Players face each other on a scoreboard (you on the left, the computer on the right). Take turns; first to square 36 wins.
 - **Listening check**: add `#check` to the link to play and flag every voice clip.
 
 ## Words
@@ -34,7 +34,7 @@ python src/build.py
 | `src/app.js`, `style.css`, `template.html` | the game |
 | `src/imgs.json` | embedded pictures (base64 WebP), cut from the Canva sticker sheets by `src/cut_sheets.py` |
 | `src/audio/`, `audio.json` | British voice clips (edge-tts `en-GB-SoniaNeural`) |
-| `src/fonts/` | Fredoka (interface) and Syazalina83 (school handwriting font for the words) |
+| `src/fonts/` | Azim Medium and Bold (Malaysian school letter shapes), used for everything |
 | `src/trim.json` | where the speech starts and ends in each clip, so no silence is played |
 
 ## Credits

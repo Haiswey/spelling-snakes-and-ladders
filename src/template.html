@@ -76,6 +76,7 @@
   <div class="bar">
     <div class="logo"><img class="ico" data-i="die" alt=""><span>Snakes &amp; Ladders</span></div>
     <div class="right">
+      <button class="switch" id="helpSwitch" role="switch" aria-checked="false"><span>Help</span><span class="track"></span></button>
       <button class="iconbtn" id="muteBtn" aria-label="Sound on or off"></button>
       <button class="iconbtn" id="quitBtn" aria-label="Back to start"><img class="ico" data-i="home" alt=""></button>
     </div>
@@ -87,21 +88,22 @@
       </div>
     </div>
     <div class="side">
-      <div class="players">
-      <div class="card player" id="pHuman">
-        <div class="pface"><img id="faceImg" alt=""></div>
-        <div class="who"><b id="whoName"></b><span><img class="ico" data-i="star" alt=""> <em id="starCount" style="font-style:normal">0</em> stars</span></div>
-        <button class="switch" id="helpSwitch" role="switch" aria-checked="false"><span>Help</span><span class="track"></span></button>
-      </div>
-      <div class="card player cpu" id="pCpu" hidden>
-        <div class="pface"><img id="oppFace" alt=""></div>
-        <div class="who"><b id="oppName"></b><span id="oppSq">Square 0</span></div>
-      </div>
-      </div>
-      <div class="card progress">
-        <div class="lbl"><span>Square <b id="sqNow">0</b></span><span>36 <img class="ico" data-i="trophy" alt="" style="height:1.3em;width:1.3em"></span></div>
-        <div class="meter"><i id="meterFill"></i></div>
-        <div class="meter m2" id="meter2" hidden><i id="meterFill2"></i></div>
+      <div class="versus" id="versus">
+        <div class="vp me" id="pHuman">
+          <span class="turntag">Your turn</span>
+          <div class="pface"><img id="faceImg" alt=""></div>
+          <b class="pname" id="whoName"></b>
+          <div class="pstat"><span><img class="ico" data-i="star" alt=""> <em id="starCount">0</em></span><span class="sq">Square <b id="sqNow">0</b></span></div>
+          <div class="meter"><i id="meterFill"></i></div>
+        </div>
+        <div class="vsbadge" id="vsBadge">VS</div>
+        <div class="vp cpu" id="pCpu" hidden>
+          <span class="turntag">Their turn</span>
+          <div class="pface"><img id="oppFace" alt=""></div>
+          <b class="pname" id="oppName"></b>
+          <div class="pstat"><span title="Computer player"><img class="ico" data-i="robot" alt=""></span><span class="sq" id="oppSq">Square 0</span></div>
+          <div class="meter m2" id="meter2"><i id="meterFill2"></i></div>
+        </div>
       </div>
       <div class="card dicebox" id="diceBox">
         <div class="scene"><canvas id="dice3d" aria-label="Dice"></canvas></div>
