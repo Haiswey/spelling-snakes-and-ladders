@@ -29,7 +29,7 @@ clips.update({
     'say_try': 'Oops! Try again.', 'say_remember': "Let's remember it.", 'say_ladder': 'A ladder! Up you go!',
     'say_snake': 'Oh no! A snake! Slide down.', 'say_win': 'You reached the top! Well done!',
     'say_spell': 'Spell the word.', 'say_roll': 'Roll the dice.', 'say_hint': 'Here is the next letter.',
-    'say_streak': 'Three in a row! You are on fire!', 'say_welcome': "Let's play!",
+    'say_streak': 'Three correct answers, one after another! You are on fire!', 'say_welcome': "Let's play!",
 })
 
 async def one(sem, key, text):

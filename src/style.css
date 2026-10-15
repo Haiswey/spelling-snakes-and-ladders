@@ -136,27 +136,15 @@ h1.title span{color:var(--sun)}
 .meter{height:14px;border-radius:999px;background:var(--line);position:relative;overflow:visible}
 .meter i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#7be37f,var(--go));width:0;transition:width .6s ease}
 .dicebox{grid-area:dice;padding:6px 10px 14px;text-align:center;cursor:pointer}
-.scene{perspective:760px;height:150px;display:flex;align-items:center;justify-content:center}
-.bounce.go{animation:bounce 1.5s ease-out}
-@keyframes bounce{0%{transform:translateY(0)}12%{transform:translateY(-80px)}28%{transform:translateY(0)}40%{transform:translateY(-38px)}52%{transform:translateY(0)}64%{transform:translateY(-14px)}76%{transform:translateY(0)}}
-.cube{width:92px;height:92px;position:relative;transform-style:preserve-3d;transform:rotateX(-25deg) rotateY(-30deg)}
-.face{
-  position:absolute;inset:0;border-radius:18px;background:linear-gradient(145deg,#ffffff 0,#eef2fb 60%,#dfe6f6 100%);
-  box-shadow:inset 0 0 0 2px rgba(31,42,92,.08),inset 0 -6px 10px rgba(31,42,92,.08),inset 0 6px 8px rgba(255,255,255,.9);
-  display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:13px;backface-visibility:hidden;
-}
-.face i{margin:auto;width:72%;height:72%;border-radius:50%}
-.face i.on{background:radial-gradient(circle at 35% 30%,#4a5aa8,#1f2a5c);box-shadow:inset 0 -2px 3px rgba(0,0,0,.3)}
-.face.f1 i.on{background:radial-gradient(circle at 35% 30%,#ff7b8a,#e03447);width:92%;height:92%}
-.f1{transform:rotateY(0) translateZ(46px)} .f6{transform:rotateY(180deg) translateZ(46px)}
-.f3{transform:rotateY(90deg) translateZ(46px)} .f4{transform:rotateY(-90deg) translateZ(46px)}
-.f2{transform:rotateX(90deg) translateZ(46px)} .f5{transform:rotateX(-90deg) translateZ(46px)}
-.pad{width:130px;height:22px;margin:-14px auto 0;border-radius:50%;background:radial-gradient(closest-side,rgba(31,42,92,.28),transparent)}
+.scene{height:190px;display:flex;align-items:center;justify-content:center}
+#dice3d{width:190px;height:190px;display:block;filter:drop-shadow(0 6px 8px rgba(31,42,92,.12))}
+.rollnum{display:inline-grid;place-items:center;min-width:1.9em;height:1.9em;margin-left:.45em;padding:0 .2em;border-radius:50%;background:var(--play);color:#fff;font-size:1.25em;box-shadow:0 3px 0 var(--play-d)}
 .msg{grid-area:msg;background:#fff8d6;border-radius:var(--r-md);padding:12px 16px;min-height:62px;display:flex;align-items:center;justify-content:center;text-align:center;
   font-weight:700;font-size:19px;box-shadow:inset 0 0 0 3px #ffe58a}
 .rollwrap{grid-area:btn}
-.legend{margin-top:2px;font-size:15px;font-weight:500;color:var(--ink-2);display:grid;gap:6px}
-.legend div{display:flex;gap:8px;align-items:center}
+.legend{margin-top:18px;font-size:15px;font-weight:500;line-height:1.35;color:var(--ink-2);display:grid;gap:10px}
+.legend div{display:flex;gap:10px;align-items:flex-start}
+.legend .ico{margin-top:.05em}
 
 @media(max-width:860px){
   .stage{grid-template-columns:1fr;gap:14px}
@@ -164,11 +152,7 @@ h1.title span{color:var(--sun)}
   .boardwrap svg{border-radius:20px}
   .side{order:-1;grid-template-columns:128px 1fr;grid-template-areas:"player player" "progress progress" "dice msg" "dice btn";gap:10px;align-items:center}
   .scene{height:128px}
-  .cube{width:76px;height:76px}
-  .f1{transform:rotateY(0) translateZ(38px)} .f6{transform:rotateY(180deg) translateZ(38px)}
-  .f3{transform:rotateY(90deg) translateZ(38px)} .f4{transform:rotateY(-90deg) translateZ(38px)}
-  .f2{transform:rotateX(90deg) translateZ(38px)} .f5{transform:rotateX(-90deg) translateZ(38px)}
-  .face{padding:10px;border-radius:15px}
+  #dice3d{width:128px;height:128px}
   .msg{min-height:54px;font-size:17px;padding:8px 12px}
   .legend{display:none}
   .logo span{display:none}

@@ -17,6 +17,7 @@ IMG.speaker = svgIcon(SPEAKER + '<path d="M43 24c4 4.500 4 11.500 0 16M49 16c8 9
 IMG.muted   = svgIcon(SPEAKER + '<path d="M44 25l14 14M58 25L44 39"/>');
 IMG.check   = svgIcon('<path d="M12 34l14 14L52 16" stroke-width="9"/>');
 
+const $ = id => document.getElementById(id);
 const N = 36, COLS = 6;
 const LADDERS = {2:14, 8:20, 6:18};     // bottom -> top
 const SNAKES  = {35:24, 28:10, 31:19};  // head -> tail
@@ -25,12 +26,14 @@ const AVATAR_NAMES = {a_fox:"Fox",a_panda:"Panda",a_tiger:"Tiger",a_rabbit:"Rabb
 const PRAISE  = ["Great job!","Awesome!","Super speller!","Brilliant!","Well done!","Fantastic!","You did it!","Excellent!"];
 const MASCOTS = ["m_owl","a_unicorn","a_panda","a_tiger","a_monkey","a_fox","a_rabbit","a_penguin","a_hamster"];
 
-const $ = id => document.getElementById(id);
 const el = (tag, cls, txt) => { const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const slug = w => w.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
 const ico = (k,c="ico") => `<img class="${c}" src="${IMG[k]}" alt="">`;
 const starsHtml = n => ico("star").repeat(n) + ico("star","ico dim").repeat(3-n);
+/*DICE3D*/
+Dice3D.init($("dice3d"));
+IMG.die = Dice3D.icon() || IMG.die;
 document.querySelectorAll("img[data-i]").forEach(e => { e.src = IMG[e.dataset.i]; });
 const store = {
   get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
@@ -162,31 +165,6 @@ function drawBoard(){
 }
 
 /* ==========================================================================
-   3-D DICE
-   ========================================================================== */
-const PIPS = {1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
-const FACE_ROT = {1:[0,0],6:[0,180],3:[0,-90],4:[0,90],2:[-90,0],5:[90,0]};
-let dx = -25, dy = -30;
-(function buildDice(){
-  for(let n=1;n<=6;n++){
-    const f = el("div","face f"+n);
-    for(let i=0;i<9;i++){ const p = el("i"); if(PIPS[n].includes(i)) p.className = "on"; f.appendChild(p); }
-    $("cube").appendChild(f);
-  }
-})();
-const mod = (a,m) => ((a%m)+m)%m;
-function rollDiceVisual(value){
-  const [rx,ry] = FACE_ROT[value], tx = rx-20, ty = ry-25;
-  const nx = dx+720+360*Math.floor(Math.random()*2)+mod(tx-dx,360);
-  const ny = dy+1080+360*Math.floor(Math.random()*2)+mod(ty-dy,360);
-  const cube = $("cube");
-  cube.style.transition = "transform 1.5s cubic-bezier(.15,.7,.2,1)";
-  cube.style.transform = `rotateX(${nx}deg) rotateY(${ny}deg)`;
-  dx = nx; dy = ny;
-  const b = $("bounce"); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go");
-}
-
-/* ==========================================================================
    STATE + START SCREEN
    ========================================================================== */
 const S = { name:"", avatar:AVATARS[0], helper:false, pos:0, stars:0, right:0, asked:0, streak:0, missed:[], used:new Set(), busy:false };
@@ -266,9 +244,9 @@ async function roll(){
   $("rollBtn").disabled = true;
   setMsg("Rolling…");
   const v = 1+Math.floor(Math.random()*6);
-  sfx.roll(); rollDiceVisual(v);
-  await sleep(1650);
-  setMsg(`You rolled a <b style="font-size:1.4em">${v}</b>!`);
+  sfx.roll();
+  await Dice3D.roll(v);
+  setMsg(`You rolled <span class="rollnum">${v}</span>`);
   Voice.say("n_"+v);
   await sleep(1400);
   const from = S.pos, to = Math.min(N, from+v);

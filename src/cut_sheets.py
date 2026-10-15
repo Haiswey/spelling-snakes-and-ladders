@@ -20,6 +20,7 @@ SHEETS = {
  10: "a_fox a_panda a_tiger a_rabbit a_unicorn a_monkey a_penguin a_hamster m_owl",
 }
 ALIAS = {'home': 'house', 'biceps': 'arm'}      # extra keys that reuse a picture
+HOLES = {'ladder'}   # pictures whose enclosed white gaps must become transparent (e.g. between ladder rungs)
 OUT = 256
 prev = os.path.join(here, 'art', 'preview'); os.makedirs(prev, exist_ok=True)
 
@@ -47,6 +48,14 @@ for n, names in SHEETS.items():
         cell = cut.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch))
         bbox = cell.getchannel('A').point(lambda v: 255 if v > 24 else 0).getbbox()
         if not bbox: print('EMPTY', n, key); continue
+        if key in HOLES:
+            a = np.asarray(cell).copy(); white = a[..., :3].min(axis=2) > 225
+            lab, n = ndi.label(white)
+            sizes = ndi.sum(white, lab, range(1, n + 1))
+            for i, s in enumerate(sizes, 1):
+                if s > 400: a[lab == i, 3] = 0
+            cell = Image.fromarray(a, 'RGBA')
+            bbox = cell.getchannel('A').point(lambda v: 255 if v > 24 else 0).getbbox()
         pad = 10
         cell = cell.crop((max(0, bbox[0] - pad), max(0, bbox[1] - pad), min(cw, bbox[2] + pad), min(ch, bbox[3] + pad)))
         s = cell.size; side = max(s)
