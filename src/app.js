@@ -31,6 +31,8 @@ const MASCOTS = ["m_owl","a_unicorn","a_panda","a_tiger","a_monkey","a_fox","a_r
 
 const el = (tag, cls, txt) => { const e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+// a word that starts a sentence ("___ is my pencil.", "Do you like cake? ___, I do.") needs a capital letter when it is filled in
+const fillSentence = (s, w) => s.replace(/___/g, (m, off) => { const before = s.slice(0, off); const starts = before === "" || /[.?!]\s+$/.test(before); return starts ? w[0].toUpperCase()+w.slice(1) : w; });
 const slug = w => w.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
 const ico = (k,c="ico") => `<img class="${c}" src="${IMG[k]}" alt="">`;
 const starsHtml = n => ico("star").repeat(n) + ico("star","ico dim").repeat(3-n);
@@ -484,7 +486,7 @@ function renderQuiz(){
 }
 
 function drawSlots(popIndex=-1){
-  const box = $("slots"); box.innerHTML = "";
+  const box = $("slots"); box.innerHTML = ""; box.style.setProperty("--cnt", Q.slots.length);
   const cur = Q.slots.findIndex(s => s==null);
   Q.slots.forEach((c,i) => {
     const s = el("div","slot"+(Q.locked[i]?" lock":"")+(i===cur&&!Q.done?" cur":"")+(i===popIndex?" pop":""), c||"");
@@ -678,11 +680,12 @@ function openDeck(title, words){
 function showCard(dir){
   const w = deck[di], card = $("fcard");
   card.classList.remove("in-l","in-r"); void card.offsetWidth; if(dir) card.classList.add(dir>0 ? "in-r" : "in-l");
-  const pic = $("fpic"); pic.innerHTML = "";
+  const pic = $("fpic"); pic.innerHTML = ""; pic.style.display = w.p ? "grid" : "none";      // words like "the" or "and" have no picture: no placeholder
   if(w.p && w.p[0]==="#"){ const s = el("div","sw"); s.style.background = w.p; pic.appendChild(s); }
-  else { const im = el("img"); im.alt = ""; im.src = IMG[w.p ? w.p.slice(1) : "talk"]; pic.appendChild(im); }
+  else if(w.p){ const im = el("img"); im.alt = ""; im.src = IMG[w.p.slice(1)]; pic.appendChild(im); }
   const fw = $("fword"); fw.innerHTML = ""; [...w.w].forEach(c => fw.appendChild(el("i","",c)));
-  $("fsent").innerHTML = w.s.replace("___", `<b>${w.w}</b>`);
+  { const i = w.s.indexOf("___"), f = fillSentence(w.s, w.w), n = w.w.length; $("fsent").innerHTML = f.slice(0,i) + "<b>" + f.slice(i,i+n) + "</b>" + f.slice(i+n); }
+  fitWord();
   $("deckCount").textContent = `${di+1} of ${deck.length}`;
   $("deckFill").style.width = ((di+1)/deck.length*100)+"%";
   $("prevCard").disabled = di===0;
@@ -724,7 +727,7 @@ const OPTION_LABEL = {
 };
 function openCheck(){
   const root = $("checkList"); root.innerHTML = ""; const flagged = new Set();
-  const sentence = {}; WORDS.forEach(w => { sentence[slug(w.w)] = w.s.replace("___", w.w); });
+  const sentence = {}; WORDS.forEach(w => { sentence[slug(w.w)] = fillSentence(w.s, w.w); });
   const groups = [
     ["Letter names (spelling out)", k => k.startsWith("l_"), k => k.slice(2).toUpperCase()],
     ["Words", k => k.startsWith("w_"), k => WORDS.find(w => slug(w.w)===k.slice(2)).w],
@@ -748,3 +751,12 @@ function openCheck(){
 }
 if(location.hash === "#check") openCheck();
 window.addEventListener("hashchange", () => { if(location.hash === "#check") openCheck(); });
+
+// A word is never broken across two lines: shrink the flashcard word until it fits on one line.
+function fitWord(){
+  const fw = $("fword"); if(!fw) return; fw.style.fontSize = "";
+  let size = parseFloat(getComputedStyle(fw).fontSize), guard = 0;
+  while(fw.scrollWidth > fw.clientWidth + 1 && size > 24 && guard++ < 80){ size *= .94; fw.style.fontSize = size+"px"; }
+}
+window.addEventListener("resize", () => { if(!$("studyDeck").hidden) fitWord(); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(!$("studyDeck").hidden) fitWord(); });

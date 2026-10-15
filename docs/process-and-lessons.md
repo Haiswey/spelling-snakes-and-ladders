@@ -133,3 +133,11 @@ Purpose: next time a new tool is built, start from here instead of rediscovering
 ## 10. Skill updated (16 Oct 2026)
 
 The installed `interactive-lesson` skill was updated in place with the lessons from this project (no new skill). New: checking and trimming voice clips, sound timed to movement, a listening page, sticker-sheet pictures, real 3D dice, game features (study first, computer opponent, scoreboard), Malaysian-letter-shape fonts and font licences, layout and visual checks at 1366x650, GitHub + Vercel git integration. Old rules that contradicted these were corrected (OpenMoji as a picture fallback, device-voice fallback, "never auto-read the word" for dictation items, 1366x768). Backup of the previous version: `Documents\skill-backup-interactive-lesson-2026-10-16`. The earlier draft folder `skill/` in this repo was removed.
+
+## 11. Round 6 (16 Oct 2026): deck pictures, torn words, sentences
+
+- **Flashcard pictures for jeans, jacket, cheese, dad were off-centre:** fragments of the neighbouring pictures stayed inside the cut cell and stretched the bounding box. `drop_strays` keeps only the connected pieces that are at least 8% of the largest.
+- **"Wednesda / y":** the flashcard word was allowed to wrap. Now `nowrap` plus a fit-to-width script; letter boxes are always one row (container query units, sized by the number of letters). Tested on all 114 words at 375 px: one line, one row.
+- **Ten nouns showed a speech-bubble placeholder** (toes, head, knee, skirt, sweater, trousers, desk, doll, rubber, stairs): a 5x2 sticker sheet made their pictures. Grammar words (the, and, ...) show no picture box.
+- **Sentences:** 9 sentences started a word in lowercase when filled ("this is my pencil."). `fillSentence` capitalises a word at the start of a sentence; all 114 sentences checked for capital, end punctuation and spacing.
+- The `interactive-lesson` skill was told: never tear a word apart, sentence capitals and punctuation, stray fragments in cut-outs, a picture for every noun.

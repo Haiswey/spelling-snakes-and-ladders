@@ -141,7 +141,7 @@
  },
  {
   "w": "toes",
-  "p": null,
+  "p": "@toes",
   "s": "I have ten ___ on my feet.",
   "t": 1,
   "g": "body"
@@ -204,14 +204,14 @@
  },
  {
   "w": "desk",
-  "p": null,
+  "p": "@desk",
   "s": "I sit at my ___.",
   "t": 1,
   "g": "school"
  },
  {
   "w": "doll",
-  "p": null,
+  "p": "@doll",
   "s": "She plays with a ___.",
   "t": 1,
   "g": "toys"
@@ -379,7 +379,7 @@
  },
  {
   "w": "rubber",
-  "p": null,
+  "p": "@rubber",
   "s": "I use a ___ to rub out my mistake.",
   "t": 2,
   "g": "school"
@@ -491,7 +491,7 @@
  },
  {
   "w": "skirt",
-  "p": null,
+  "p": "@skirt",
   "s": "She wears a ___ to school.",
   "t": 2,
   "g": "clothes"
@@ -505,14 +505,14 @@
  },
  {
   "w": "head",
-  "p": null,
+  "p": "@head",
   "s": "I wear a hat on my ___.",
   "t": 2,
   "g": "body"
  },
  {
   "w": "knee",
-  "p": null,
+  "p": "@knee",
   "s": "I bend my ___.",
   "t": 2,
   "g": "body"
@@ -568,7 +568,7 @@
  },
  {
   "w": "stairs",
-  "p": null,
+  "p": "@stairs",
   "s": "I go up the ___.",
   "t": 2,
   "g": "home"
@@ -729,14 +729,14 @@
  },
  {
   "w": "sweater",
-  "p": null,
+  "p": "@sweater",
   "s": "I wear a warm ___.",
   "t": 3,
   "g": "clothes"
  },
  {
   "w": "trousers",
-  "p": null,
+  "p": "@trousers",
   "s": "He wears long ___.",
   "t": 3,
   "g": "clothes"

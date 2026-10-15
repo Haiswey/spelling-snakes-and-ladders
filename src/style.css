@@ -433,3 +433,10 @@ h1.title span{color:var(--sun)}
 }
 
 .banner{width:max-content}
+
+/* ---------- a word is never torn apart ---------- */
+body{overflow-wrap:normal;word-break:normal;hyphens:none}
+.fword{white-space:nowrap;word-break:normal;overflow-wrap:normal;display:block}
+.slots{container-type:inline-size;flex-wrap:nowrap;gap:6px}
+.slot{width:min(58px,calc((100cqi - (var(--cnt,6) - 1)*6px)/var(--cnt,6)));flex:none;font-size:min(calc(var(--h)*.66),calc(100cqi/var(--cnt,6)*.78))}
+.miss button,.pname,.gtile b{white-space:nowrap}

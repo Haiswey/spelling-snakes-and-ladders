@@ -18,6 +18,7 @@ SHEETS = {
  8: "n1 n2 n3 n4 n5 n6 n7 n8 n9",
  9: "n10 die ladder snake bulb fire talk help -",
  10: "a_fox a_panda a_tiger a_rabbit a_unicorn a_monkey a_penguin a_hamster m_owl",
+ 11: ("head knee toes skirt sweater trousers desk doll rubber stairs", 5, 2),   # 5 columns x 2 rows
 }
 ALIAS = {'home': 'house', 'biceps': 'arm'}      # extra keys that reuse a picture
 HOLES = {'ladder'}   # pictures whose enclosed white gaps must become transparent (e.g. between ladder rungs)
@@ -37,14 +38,26 @@ def cut_background(img):
     rgba = np.dstack([a.astype(np.uint8), (np.clip(alpha, 0, 1) * 255).astype(np.uint8)])
     return Image.fromarray(rgba, 'RGBA')
 
+def drop_strays(cell):
+    # keep the main picture and any real part of it; drop small fragments that belong to a neighbouring picture
+    a = np.asarray(cell).copy(); solid = a[..., 3] > 24
+    lab, n = ndi.label(ndi.binary_dilation(solid, iterations=8))
+    if n <= 1: return cell
+    sizes = ndi.sum(solid, lab, range(1, n + 1)); big = sizes.max()
+    for i, s in enumerate(sizes, 1):
+        if s < 0.08 * big: a[(lab == i) & True, 3] = 0
+    return Image.fromarray(a, 'RGBA')
+
 out, sheet_prev = {}, []
 for n, names in SHEETS.items():
     path = os.path.join(here, 'art', f'sheet_{n}.png')
     cut = cut_background(Image.open(path))
-    W, H = cut.size; cw, ch = W // 3, H // 3
+    cols, rows = 3, 3
+    if isinstance(names, tuple): names, cols, rows = names
+    W, H = cut.size; cw, ch = W // cols, H // rows
     for i, key in enumerate(names.split()):
         if key == '-': continue
-        r, c = divmod(i, 3)
+        r, c = divmod(i, cols)
         cell = cut.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch))
         bbox = cell.getchannel('A').point(lambda v: 255 if v > 24 else 0).getbbox()
         if not bbox: print('EMPTY', n, key); continue
@@ -56,6 +69,8 @@ for n, names in SHEETS.items():
                 if s > 400: a[lab == i, 3] = 0
             cell = Image.fromarray(a, 'RGBA')
             bbox = cell.getchannel('A').point(lambda v: 255 if v > 24 else 0).getbbox()
+        cell = drop_strays(cell)
+        bbox = cell.getchannel('A').point(lambda v: 255 if v > 24 else 0).getbbox()
         pad = 10
         cell = cell.crop((max(0, bbox[0] - pad), max(0, bbox[1] - pad), min(cw, bbox[2] + pad), min(ch, bbox[3] + pad)))
         s = cell.size; side = max(s)
