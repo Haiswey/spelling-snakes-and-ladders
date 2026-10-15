@@ -129,3 +129,7 @@ Purpose: next time a new tool is built, start from here instead of rediscovering
 - **How it was checked:** measured the Roll button's bottom edge at 1280x500, 1280x600, 1366x650, 1536x740 and 1920x950 (always inside the screen) plus a phone; played a full turn with the Space key.
 - **Gotcha:** in a hidden preview pane CSS animations freeze at their first frame (a fade-in left the page 8 px low). Subtract it when measuring, or bring the pane to the front.
 - **Rule for next time:** design the layout for a 1366x650 visible area first (laptop with toolbars), then scale up.
+
+## 10. Skill updated (16 Oct 2026)
+
+The installed `interactive-lesson` skill was updated in place with the lessons from this project (no new skill). New: checking and trimming voice clips, sound timed to movement, a listening page, sticker-sheet pictures, real 3D dice, game features (study first, computer opponent, scoreboard), Malaysian-letter-shape fonts and font licences, layout and visual checks at 1366x650, GitHub + Vercel git integration. Old rules that contradicted these were corrected (OpenMoji as a picture fallback, device-voice fallback, "never auto-read the word" for dictation items, 1366x768). Backup of the previous version: `Documents\skill-backup-interactive-lesson-2026-10-16`. The earlier draft folder `skill/` in this repo was removed.
