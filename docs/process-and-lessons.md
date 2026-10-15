@@ -117,3 +117,15 @@ Purpose: next time a new tool is built, start from here instead of rediscovering
 - **Pronunciation checks:** "ball" measured closer to "bawl" than "bull" (so not obviously wrong), but the teacher hears "bull": added a listening list with alternatives (other voices, "bawl", "boll") on the #check page to choose by ear. "row": the sentence version did not match "roe" as closely as identical text should (2.9 vs 0.6), so the spoken line now uses "roe" (screen text unchanged).
 - **Sound in step with movement:** hop = take-off blip at the start, landing thud ~340 ms later (when the badge arrives), chime on the last square; ladder / snake sounds start with the slide and last as long as it (1.2 s); dice clacks fire at the three bounces of the 3-D dice. Checked by logging sound times against the animation.
 - **Head-to-head layout:** two players side by side with a VS badge, a "turn" tag, and a progress bar each; the Help switch moved to the top bar.
+
+## 9. Round 5 (16 Oct 2026): the play column must fit a laptop screen
+
+- **Problem (teacher screenshot):** on a laptop the message under the dice was below the fold. The right column stacked scoreboard + big dice card + message + button + two rule lines, taller than the ~600-650 px a laptop browser really shows.
+- **Fix, in four parts:**
+  1. The column is as tall as the visible screen (stage height = 100vh minus 140 px); the dice shrinks to whatever space is left (60-220 px).
+  2. Message, Roll button and dice are one card; the Roll button pulses when it is the pupil's turn; Space or Enter rolls on a computer.
+  3. Big messages ("You rolled 4", "Panda is spelling...") pop up as a banner on the board; the side panel only keeps a one-line status.
+  4. The two rule lines moved to a "?" button and a "How to play" pop-up, shown once to a new player.
+- **How it was checked:** measured the Roll button's bottom edge at 1280x500, 1280x600, 1366x650, 1536x740 and 1920x950 (always inside the screen) plus a phone; played a full turn with the Space key.
+- **Gotcha:** in a hidden preview pane CSS animations freeze at their first frame (a fade-in left the page 8 px low). Subtract it when measuring, or bring the pane to the front.
+- **Rule for next time:** design the layout for a 1366x650 visible area first (laptop with toolbars), then scale up.

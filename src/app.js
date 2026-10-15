@@ -261,13 +261,32 @@ function startGame(){
   if(S.opp){ $("oppName").textContent = S.opp.name; $("oppFace").src = IMG[S.opp.avatar]; }
   placeToken(0,0,false); if(S.opp) placeToken(1,0,false);
   updateHUD(); setTurn(0);
-  setMsg("Tap the dice to roll!");
+  setIdle("Tap the dice to roll!");
   $("rollBtn").disabled = false;
   show("game");
+  if(!store.get("ssl_how")) setTimeout(openHow, 500);
   Voice.say("say_welcome");
 }
 
-function setMsg(html){ $("msg").innerHTML = html; }
+// Big messages appear on the board (where the eyes are); the side panel keeps a short one-line status.
+let bannerTimer = 0;
+function setMsg(html, hold=false){
+  const b = $("banner"); b.innerHTML = html; b.classList.remove("on"); void b.offsetWidth; b.classList.add("on");
+  clearTimeout(bannerTimer); if(!hold) bannerTimer = setTimeout(() => b.classList.remove("on"), 3000);
+  $("status").innerHTML = html;
+}
+function setIdle(text){ clearTimeout(bannerTimer); $("banner").classList.remove("on"); $("status").textContent = text; }
+
+// how-to-play pop-up (shown once to a new player, and from the ? button)
+const openHow = () => $("howto").classList.add("on");
+const closeHow = () => { $("howto").classList.remove("on"); store.set("ssl_how", "1"); };
+$("howBtn").onclick = openHow; $("howOk").onclick = closeHow;
+// Space or Enter rolls the dice on a computer
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && $("howto").classList.contains("on")){ closeHow(); return; }
+  if(!$("game").classList.contains("on") || Q || $("howto").classList.contains("on") || S.busy) return;
+  if(e.key === " " || e.key === "Enter"){ e.preventDefault(); roll(); }
+});
 function setTurn(i){
   $("pHuman").classList.toggle("turn", i===0); $("pCpu").classList.toggle("turn", i===1);
   T.forEach((t,k) => t.style.zIndex = k===i ? 6 : 5);
@@ -316,14 +335,14 @@ async function slideTo(i, to, kind){
    TURNS
    ========================================================================== */
 $("rollBtn").onclick = roll;
-$("diceBox").onclick = roll;
+$("diceScene").onclick = roll;
 async function roll(){
   if(S.busy) return; S.busy = true; ac();
   $("rollBtn").disabled = true;
   if(await humanTurn()) return;
   if(S.opp && await cpuTurn()) return;
   S.busy = false; $("rollBtn").disabled = false; setTurn(0);
-  setMsg("Your turn! Tap the dice.");
+  setIdle("Your turn! Tap the dice.");
 }
 
 async function humanTurn(){
