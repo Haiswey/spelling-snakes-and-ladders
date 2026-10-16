@@ -146,3 +146,10 @@ The installed `interactive-lesson` skill was updated in place with the lessons f
 
 - **Title:** white letters with a soft shadow and a yellow word on a light sky had weak contrast. New lockup: a blue "SPELLING" pill above a large "Snakes & Ladders", each word a bright fill (green, yellow) with a navy outline on all sides and a solid extruded edge (built with text-shadow so it works in every browser). It wraps only between words on a phone.
 - **Snake, dice and ladder as one picture:** instead of three separate icons in a row, one scene: the ladder leans against the dice, the snake coils up beside it, a ground shadow, small stars, and slow sway/bob animations. Pictures overlap with different depth and shadow so they read as one object group.
+
+## 13. Round 7 (16 Oct 2026): cropped pictures, wrong pictures, hero animation
+
+- **Pictures cropped at the top** (leg, foot, robot, sweater) and **pizza off-centre:** the cut-out used fixed grid cells. `cut_sheets.py` now finds each picture as a whole shape (thin shadows ignored, joining distance narrowed when pictures are close), keeps thin parts, centres on the visual centre and never clips. Checked by a script over all 100 pictures: none touches an edge, none more than 8% off-centre.
+- **Wrong pictures:** kitchen, bathroom and bedroom are now whole cutaway rooms (they were a stove with a pot, a bathtub, a bed); photo is a photo print (was a camera); toes are five toes (was a whole foot). New sheets 12 (rooms) and 13 (toes, photo).
+- **Home page:** the dice now rolls along the ground beside the ladder (three turns, bounces, rolls back) and the snake climbs the ladder in ten wriggling hops, instead of floating up and down.
+- The `interactive-lesson` skill was updated with these lessons.

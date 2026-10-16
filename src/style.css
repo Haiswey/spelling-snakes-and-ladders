@@ -454,19 +454,42 @@ body{overflow-wrap:normal;word-break:normal;hyphens:none}
 .hero-art{position:relative;width:min(400px,84vw);height:clamp(150px,34vw,210px);margin:6px auto 4px}
 .hero-art .ha{position:absolute;display:block}
 .hero-art .ground{left:6%;right:6%;bottom:0;height:13%;border-radius:50%;background:radial-gradient(closest-side,rgba(31,42,92,.28),rgba(31,42,92,0))}
-.hero-art .ladder{left:7%;bottom:5%;height:96%;width:auto;transform:rotate(15deg);transform-origin:50% 100%;z-index:1;filter:drop-shadow(0 8px 6px rgba(31,42,92,.22))}
-.hero-art .dice{left:30%;bottom:9%;width:42%;height:auto;z-index:2;animation:heroDice 3.6s ease-in-out infinite;filter:drop-shadow(0 10px 8px rgba(31,42,92,.28))}
-.hero-art .snake{left:57%;bottom:3%;height:80%;width:auto;z-index:3;transform-origin:50% 100%;animation:heroSnake 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 6px rgba(31,42,92,.25))}
 .hero-art .spark{width:9%;height:auto;z-index:4;animation:twinkle 2.4s ease-in-out infinite}
 .hero-art .s1{left:70%;top:2%}
 .hero-art .s2{left:20%;top:6%;width:7%;animation-delay:-1.2s}
 .hero-art .s3{left:90%;top:38%;width:8%;animation-delay:-.6s}
-@keyframes heroDice{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(3deg)}}
-@keyframes heroSnake{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}
 @keyframes twinkle{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.15);opacity:1}}
 /* scene tweak: ladder leans on the dice but stays visible */
 .hero-art{width:min(440px,88vw);height:clamp(160px,36vw,220px)}
-.hero-art .ladder{left:0;bottom:5%;height:94%;transform:rotate(11deg)}
-.hero-art .dice{left:31%;width:37%}
-.hero-art .snake{left:61%;height:76%}
 .hero-art .s2{left:12%;top:4%}
+
+/* ---------- home scene in motion: the snake climbs the ladder, the dice rolls beside it ---------- */
+.hero-art .rig{left:0;bottom:5%;height:94%;aspect-ratio:1;transform:rotate(11deg);transform-origin:50% 100%;z-index:1}
+.hero-art .rig .lad{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 8px 6px rgba(31,42,92,.22))}
+.hero-art .climber{position:absolute;left:50%;bottom:6%;width:56%;height:auto;z-index:2;transform-origin:50% 100%;opacity:0;
+  filter:drop-shadow(0 6px 5px rgba(31,42,92,.3));animation:snakeClimb 8s ease-in-out infinite}
+/* ten small hops up the rungs, wriggling left and right, squashing and stretching like a body pulling itself up; fades at the top, starts again at the bottom */
+@keyframes snakeClimb{
+  0%{opacity:0;transform:translate(-50%,0) rotate(0) scale(1,1)}
+  4%{opacity:1;transform:translate(-50%,0) rotate(0) scale(1,1)}
+  10%{transform:translate(-50%,-12%) rotate(-6deg) scale(1.05,.94)}
+  17%{transform:translate(-50%,-22%) rotate(5deg) scale(.96,1.06)}
+  24%{transform:translate(-50%,-34%) rotate(-6deg) scale(1.05,.94)}
+  31%{transform:translate(-50%,-44%) rotate(5deg) scale(.96,1.06)}
+  38%{transform:translate(-50%,-56%) rotate(-6deg) scale(1.05,.94)}
+  45%{transform:translate(-50%,-66%) rotate(5deg) scale(.96,1.06)}
+  52%{transform:translate(-50%,-78%) rotate(-6deg) scale(1.05,.94)}
+  59%{transform:translate(-50%,-88%) rotate(5deg) scale(.96,1.06)}
+  66%{transform:translate(-50%,-100%) rotate(-6deg) scale(1.05,.94)}
+  74%{opacity:1;transform:translate(-50%,-108%) rotate(4deg) scale(1,1)}
+  82%{opacity:1;transform:translate(-50%,-108%) rotate(-3deg) scale(1,1)}
+  90%{opacity:0;transform:translate(-50%,-110%) rotate(0) scale(1,1)}
+  100%{opacity:0;transform:translate(-50%,0) rotate(0) scale(1,1)}}
+.hero-art .roller{left:47%;bottom:6%;width:27%;z-index:3;animation:rollAcross 7s ease-in-out infinite}
+.hero-art .roller .hop{animation:hopRoll 7s ease-in-out infinite}
+.hero-art .roller img{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 6px rgba(31,42,92,.3));animation:spinRoll 7s ease-in-out infinite}
+/* rolls to the right turning over three times, bounces as it goes, rests, then rolls back */
+@keyframes rollAcross{0%,6%{transform:translateX(0)}40%,56%{transform:translateX(88%)}90%,100%{transform:translateX(0)}}
+@keyframes spinRoll{0%,6%{transform:rotate(0)}40%,56%{transform:rotate(1080deg)}90%,100%{transform:rotate(0)}}
+@keyframes hopRoll{0%,6%{transform:translateY(0)}13%{transform:translateY(-22%)}20%{transform:translateY(0)}27%{transform:translateY(-14%)}34%{transform:translateY(0)}40%{transform:translateY(-6%)}44%,56%{transform:translateY(0)}
+  63%{transform:translateY(-20%)}70%{transform:translateY(0)}77%{transform:translateY(-12%)}84%{transform:translateY(0)}90%,100%{transform:translateY(0)}}
