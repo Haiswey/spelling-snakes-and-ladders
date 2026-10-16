@@ -141,3 +141,8 @@ The installed `interactive-lesson` skill was updated in place with the lessons f
 - **Ten nouns showed a speech-bubble placeholder** (toes, head, knee, skirt, sweater, trousers, desk, doll, rubber, stairs): a 5x2 sticker sheet made their pictures. Grammar words (the, and, ...) show no picture box.
 - **Sentences:** 9 sentences started a word in lowercase when filled ("this is my pencil."). `fillSentence` capitalises a word at the start of a sentence; all 114 sentences checked for capital, end punctuation and spacing.
 - The `interactive-lesson` skill was told: never tear a word apart, sentence capitals and punctuation, stray fragments in cut-outs, a picture for every noun.
+
+## 12. Home page logo and scene (16 Oct 2026)
+
+- **Title:** white letters with a soft shadow and a yellow word on a light sky had weak contrast. New lockup: a blue "SPELLING" pill above a large "Snakes & Ladders", each word a bright fill (green, yellow) with a navy outline on all sides and a solid extruded edge (built with text-shadow so it works in every browser). It wraps only between words on a phone.
+- **Snake, dice and ladder as one picture:** instead of three separate icons in a row, one scene: the ladder leans against the dice, the snake coils up beside it, a ground shadow, small stars, and slow sway/bob animations. Pictures overlap with different depth and shadow so they read as one object group.

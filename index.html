@@ -80,13 +80,7 @@ img{-webkit-user-drag:none}
 
 /* ---------- start ---------- */
 .hero{max-width:760px;margin:0 auto;text-align:center}
-.brandmark{display:flex;justify-content:center;gap:2px;margin:12px 0 4px}
-.brandmark .ico{height:84px;width:84px;filter:drop-shadow(0 8px 6px rgba(31,42,92,.22));animation:float 3.4s ease-in-out infinite}
-.brandmark .ico:nth-child(2){animation-delay:-1.1s;height:96px;width:96px}
-.brandmark .ico:nth-child(3){animation-delay:-2.2s}
 @keyframes float{50%{transform:translateY(-8px) rotate(2deg)}}
-h1.title{margin:0;font-size:clamp(34px,7.4vw,60px);line-height:1;font-weight:700;color:#fff;text-shadow:0 4px 0 rgba(31,42,92,.35),0 10px 24px rgba(31,42,92,.25);letter-spacing:.5px}
-h1.title span{color:var(--sun)}
 .tag{margin:10px 0 18px;font-size:clamp(17px,3.4vw,22px);color:var(--ink);font-weight:600}
 .steps{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:0 0 18px}
 .steps div{background:rgba(255,255,255,.75);border-radius:999px;padding:8px 16px;font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(4px)}
@@ -451,6 +445,42 @@ body{overflow-wrap:normal;word-break:normal;hyphens:none}
 .slot{width:min(58px,calc((100cqi - (var(--cnt,6) - 1)*6px)/var(--cnt,6)));flex:none;font-size:min(calc(var(--h)*.66),calc(100cqi/var(--cnt,6)*.78))}
 .miss button,.pname,.gtile b{white-space:nowrap}
 
+/* ---------- home page logo ---------- */
+.title{margin:2px 0 0;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700}
+.t-top{display:inline-block;padding:3px 24px 6px;border-radius:999px;background:var(--blue);color:#fff;font-size:clamp(18px,4.4vw,30px);letter-spacing:.16em;text-transform:uppercase;
+  box-shadow:0 5px 0 var(--blue-d),0 12px 20px rgba(31,42,92,.22);text-shadow:0 2px 0 rgba(0,0,0,.18)}
+.t-main{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0 .2em;font-size:clamp(46px,12.5vw,96px);line-height:1.08}
+.t-main span{white-space:nowrap;
+  /* navy outline on all sides, then a solid "extruded" edge under the letters: reads on any sky colour */
+  text-shadow:
+   .05em 0 0 #1f2a5c,-.05em 0 0 #1f2a5c,0 .05em 0 #1f2a5c,0 -.05em 0 #1f2a5c,
+   .036em .036em 0 #1f2a5c,-.036em .036em 0 #1f2a5c,.036em -.036em 0 #1f2a5c,-.036em -.036em 0 #1f2a5c,
+   0 .1em 0 #1f2a5c,.04em .1em 0 #1f2a5c,-.04em .1em 0 #1f2a5c,0 .15em .12em rgba(31,42,92,.35)}
+.t-snakes{color:#7be37f}
+.t-ladders{color:#ffc933}
+.t-amp{color:#fff;font-size:.62em;position:relative;top:-.04em}
+
+/* ---------- one scene: the ladder leans on the dice and the snake coils up beside it ---------- */
+.hero-art{position:relative;width:min(400px,84vw);height:clamp(150px,34vw,210px);margin:6px auto 4px}
+.hero-art .ha{position:absolute;display:block}
+.hero-art .ground{left:6%;right:6%;bottom:0;height:13%;border-radius:50%;background:radial-gradient(closest-side,rgba(31,42,92,.28),rgba(31,42,92,0))}
+.hero-art .ladder{left:7%;bottom:5%;height:96%;width:auto;transform:rotate(15deg);transform-origin:50% 100%;z-index:1;filter:drop-shadow(0 8px 6px rgba(31,42,92,.22))}
+.hero-art .dice{left:30%;bottom:9%;width:42%;height:auto;z-index:2;animation:heroDice 3.6s ease-in-out infinite;filter:drop-shadow(0 10px 8px rgba(31,42,92,.28))}
+.hero-art .snake{left:57%;bottom:3%;height:80%;width:auto;z-index:3;transform-origin:50% 100%;animation:heroSnake 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 6px rgba(31,42,92,.25))}
+.hero-art .spark{width:9%;height:auto;z-index:4;animation:twinkle 2.4s ease-in-out infinite}
+.hero-art .s1{left:70%;top:2%}
+.hero-art .s2{left:20%;top:6%;width:7%;animation-delay:-1.2s}
+.hero-art .s3{left:90%;top:38%;width:8%;animation-delay:-.6s}
+@keyframes heroDice{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+@keyframes heroSnake{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}
+@keyframes twinkle{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+/* scene tweak: ladder leans on the dice but stays visible */
+.hero-art{width:min(440px,88vw);height:clamp(160px,36vw,220px)}
+.hero-art .ladder{left:0;bottom:5%;height:94%;transform:rotate(11deg)}
+.hero-art .dice{left:31%;width:37%}
+.hero-art .snake{left:61%;height:76%}
+.hero-art .s2{left:12%;top:4%}
+
 </style>
 </head>
 <body>
@@ -468,8 +498,19 @@ body{overflow-wrap:normal;word-break:normal;hyphens:none}
 <!-- ============ START ============ -->
 <section id="start" class="screen on">
   <div class="hero">
-    <div class="brandmark"><img class="ico" data-i="snake" alt=""><img class="ico" data-i="die" alt=""><img class="ico" data-i="ladder" alt=""></div>
-    <h1 class="title">Spelling <span>Snakes</span> &amp; <span>Ladders</span></h1>
+    <div class="hero-art" aria-hidden="true">
+      <div class="ha ground"></div>
+      <img class="ha ladder" data-i="ladder" alt="">
+      <img class="ha dice" data-i="die" alt="">
+      <img class="ha snake" data-i="snake" alt="">
+      <img class="ha spark s1" data-i="star" alt="">
+      <img class="ha spark s2" data-i="star" alt="">
+      <img class="ha spark s3" data-i="star" alt="">
+    </div>
+    <h1 class="title" aria-label="Spelling Snakes and Ladders">
+      <span class="t-top">Spelling</span>
+      <span class="t-main"><span class="t-snakes">Snakes</span> <span class="t-amp">&amp;</span> <span class="t-ladders">Ladders</span></span>
+    </h1>
     <p class="tag">Roll the dice, spell the word and climb to the top!</p>
     <div class="steps">
       <div><img class="ico" data-i="die" alt=""> Roll</div>
