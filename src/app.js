@@ -827,11 +827,18 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(
       body.push({ x:p0[0] - ty*off, y:p0[1] + tx*off, r, u, i });
     }
     if(body.length < 3) return;
-    // pass 1: dark outline, pass 2: body colour with banding, pass 3: pale back stripe and dark saddle spots
-    for(const q of body){ c.fillStyle = "#1d5e2b"; c.beginPath(); c.arc(q.x, q.y, q.r + 1.6, 0, 7); c.fill(); }
-    body.forEach((q, k) => { c.fillStyle = k % 6 < 3 ? "#49b34a" : "#3fa642"; c.beginPath(); c.arc(q.x, q.y, q.r, 0, 7); c.fill(); });
-    body.forEach((q, k) => { c.fillStyle = "rgba(190,236,120,.55)"; c.beginPath(); c.arc(q.x, q.y, q.r*.32, 0, 7); c.fill(); });
-    body.forEach((q, k) => { if(k % 7 === 3 && q.r > 2.5){ c.fillStyle = "rgba(24,110,44,.75)"; c.beginPath(); c.ellipse(q.x, q.y, q.r*.78, q.r*.5, 0, 0, 7); c.fill(); c.strokeStyle = "rgba(210,245,140,.7)"; c.lineWidth = Math.max(1, q.r*.12); c.stroke(); } });
+    // one smooth body: outline, green skin, pale belly edge, light back stripe and a few soft diamond marks (no separate discs)
+    const nrm = body.map((q, k) => { const a = body[Math.max(0, k - 1)], b = body[Math.min(body.length - 1, k + 1)]; let dx = b.x - a.x, dy = b.y - a.y; const l = Math.hypot(dx, dy) || 1; return [-dy/l, dx/l]; });
+    const ribbon = (w, fill) => {
+      c.beginPath();
+      body.forEach((q, k) => { const r = Math.max(.5, q.r*w); c[k ? "lineTo" : "moveTo"](q.x + nrm[k][0]*r, q.y + nrm[k][1]*r); });
+      for(let k = body.length - 1; k >= 0; k--){ const q = body[k], r = Math.max(.5, q.r*w); c.lineTo(q.x - nrm[k][0]*r, q.y - nrm[k][1]*r); }
+      c.closePath(); c.fillStyle = fill; c.fill();
+    };
+    c.lineJoin = c.lineCap = "round";
+    ribbon(1 + 1.8/rmax, "#1d5e2b"); ribbon(1, "#4cb44b"); ribbon(.62, "#3a9a41"); ribbon(.26, "rgba(200,240,130,.7)");
+    for(let k = 6; k < body.length - 6; k += 9){ const q = body[k]; if(q.r < 2.5) continue; const a = Math.atan2(nrm[k][0], -nrm[k][1]);
+      c.save(); c.translate(q.x, q.y); c.rotate(a); c.fillStyle = "rgba(22,95,40,.55)"; c.beginPath(); c.moveTo(-q.r*.5, 0); c.lineTo(0, -q.r*.42); c.lineTo(q.r*.5, 0); c.lineTo(0, q.r*.42); c.closePath(); c.fill(); c.restore(); }
     // head
     const hd = body[body.length - 1], nx = body[body.length - 4];
     const ang = Math.atan2(hd.y - nx.y, hd.x - nx.x) + (rest ? Math.sin(rest*2.6)*.18 : 0), rh = rmax*1.12, dx = Math.cos(ang), dy = Math.sin(ang), px = -dy, py = dx;
