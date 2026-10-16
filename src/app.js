@@ -760,3 +760,105 @@ function fitWord(){
 }
 window.addEventListener("resize", () => { if(!$("studyDeck").hidden) fitWord(); });
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(!$("studyDeck").hidden) fitWord(); });
+
+/* ==========================================================================
+   HOME PAGE: a whole snake glides up the ladder
+   The ladder's axis is measured from its own picture; the snake follows an S-shaped track (ground, a bend, then up the ladder).
+   Body and head travel along the same track, so the body follows the head exactly as a real snake does.
+   ========================================================================== */
+(function heroSnake(){
+  const host = document.querySelector(".hero-art"); if(!host) return;
+  const cv = el("canvas","ha hero-snake"); host.insertBefore(cv, host.querySelector(".roller")); const c = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let axis = null, W = 0, H = 0, padL = 0, path = null, L = 0, running = true, t0 = performance.now();
+  const CYCLE = 11;                                             // seconds: climb 6.4, rest at the top 2.6, fade, pause
+  const smooth = (a, b, x) => { x = Math.max(0, Math.min(1, (x - a)/(b - a))); return x*x*(3 - 2*x); };
+
+  function measureLadder(img){                                  // principal axis of the opaque pixels = the ladder's centre line
+    const N = 128, k = document.createElement("canvas"); k.width = k.height = N; const x = k.getContext("2d"); x.drawImage(img, 0, 0, N, N);
+    const d = x.getImageData(0, 0, N, N).data, pts = []; let mx = 0, my = 0;
+    for(let y=0;y<N;y++) for(let i=0;i<N;i++) if(d[(y*N+i)*4+3] > 120){ pts.push([i,y]); mx += i; my += y; }
+    mx /= pts.length; my /= pts.length; let sxx = 0, sxy = 0, syy = 0;
+    for(const [px,py] of pts){ const dx = px - mx, dy = py - my; sxx += dx*dx; sxy += dx*dy; syy += dy*dy; }
+    const ang = .5*Math.atan2(2*sxy, sxx - syy); let ux = Math.cos(ang), uy = Math.sin(ang); if(uy > 0){ ux = -ux; uy = -uy; }
+    let lo = 1e9, hi = -1e9; for(const [px,py] of pts){ const s = (px - mx)*ux + (py - my)*uy; lo = Math.min(lo, s); hi = Math.max(hi, s); }
+    return { b:[(mx + ux*lo)/N, (my + uy*lo)/N], t:[(mx + ux*hi)/N, (my + uy*hi)/N] };
+  }
+
+  function layout(){
+    if(!axis || !host.clientWidth) return;
+    const dpr = Math.min(2, devicePixelRatio || 1); W = host.clientWidth; H = host.clientHeight; padL = Math.round(W*.35);
+    cv.width = (W + padL)*dpr; cv.height = H*dpr; cv.style.width = (W + padL)+"px"; cv.style.height = H+"px"; c.setTransform(dpr,0,0,dpr,padL*dpr,0);
+    // same geometry as the CSS of the ladder (.rig): a square of 94% of the height, bottom 5%, turned 11 degrees about its bottom centre
+    const S = .94*H, th = 11*Math.PI/180, top = .01*H, pv = [S/2, top + S];
+    const map = (u,v) => { const x = u*S - pv[0], y = top + v*S - pv[1]; return [pv[0] + x*Math.cos(th) - y*Math.sin(th), pv[1] + x*Math.sin(th) + y*Math.cos(th)]; };
+    let b = map(...axis.b), tp = map(...axis.t); L = Math.hypot(tp[0]-b[0], tp[1]-b[1]); const ux = (tp[0]-b[0])/L, uy = (tp[1]-b[1])/L;
+    const A = [b[0] + ux*L*.06, b[1] + uy*L*.06], B = [tp[0] - ux*L*.07, tp[1] - uy*L*.07], LL = Math.hypot(B[0]-A[0], B[1]-A[1]);
+    // track: ground -> smooth bend -> up the ladder -> a little beyond the top
+    const bodyLen = .72*LL, ground = bodyLen + W*.55, bend = LL*.16, ext = LL*.1, ds = 2, P = [];
+    const g0 = [A[0] - ground, A[1]], g1 = [A[0] - bend, A[1]], a1 = [A[0] + ux*bend, A[1] + uy*bend];
+    const seg = (p0, p1) => { const n = Math.max(1, Math.round(Math.hypot(p1[0]-p0[0], p1[1]-p0[1])/ds)); for(let i=0;i<n;i++) P.push([p0[0] + (p1[0]-p0[0])*i/n, p0[1] + (p1[1]-p0[1])*i/n]); };
+    seg(g0, g1);
+    for(let i=0;i<=40;i++){ const q = i/40, x = (1-q)*(1-q)*g1[0] + 2*(1-q)*q*A[0] + q*q*a1[0], y = (1-q)*(1-q)*g1[1] + 2*(1-q)*q*A[1] + q*q*a1[1]; P.push([x,y]); }
+    const li0 = P.length;
+    seg(a1, B); seg(B, [B[0] + ux*ext, B[1] + uy*ext]);
+    path = { P, ds, bodyLen, ladderStart: li0, LL, ux, uy };
+  }
+
+  const at = s => { const P = path.P, i = Math.max(0, Math.min(P.length - 2, Math.floor(s/path.ds))); return P[i]; };
+
+  function draw(sec){
+    if(!path) return;
+    c.clearRect(-padL, 0, W + padL, H);
+    const P = path.P, N = P.length, bodyLen = path.bodyLen, LL = path.LL;
+    const climbT = 6.4, climb = smooth(0, 1, sec/climbT), sh0 = 0, sh1 = (N - 1)*path.ds;
+    const sh = sh0 + (sh1 - sh0)*(sec < climbT ? (.12*sec/climbT + .88*climb) : 1);   // head position along the track (a gentle ease at the end)
+    const alpha = sec < 9.2 ? 1 : Math.max(0, 1 - (sec - 9.2)/.7);
+    if(alpha <= 0) return; c.globalAlpha = alpha;
+    const rmax = .058*LL, lam = .3*LL, rest = sec > climbT ? (sec - climbT) : 0;
+    const body = [], n = 120;
+    for(let i = n; i >= 0; i--){
+      const d = bodyLen*i/n, s = sh - d; if(s < 0 || s > (N-1)*path.ds) continue;
+      const idx = Math.floor(s/path.ds), p0 = P[idx], p1 = P[Math.min(N-1, idx + 3)];
+      let tx = p1[0] - p0[0], ty = p1[1] - p0[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+      const onLadder = s > path.ladderStart*path.ds, env = (onLadder ? .09 : .075)*LL*(.55 + .45*smooth(0, .12, d/bodyLen));
+      const off = env*Math.sin(2*Math.PI*s/lam) + (rest ? Math.sin(rest*2.2 + d*.02)*.012*LL*(1 - d/bodyLen) : 0);
+      const u = d/bodyLen, r = rmax*(.8 + .2*Math.sin(Math.PI*Math.min(1, u*.95 + .02)))*(1 - .86*smooth(.58, 1, u));
+      body.push({ x:p0[0] - ty*off, y:p0[1] + tx*off, r, u, i });
+    }
+    if(body.length < 3) return;
+    // pass 1: dark outline, pass 2: body colour with banding, pass 3: pale back stripe and dark saddle spots
+    for(const q of body){ c.fillStyle = "#1d5e2b"; c.beginPath(); c.arc(q.x, q.y, q.r + 1.6, 0, 7); c.fill(); }
+    body.forEach((q, k) => { c.fillStyle = k % 6 < 3 ? "#49b34a" : "#3fa642"; c.beginPath(); c.arc(q.x, q.y, q.r, 0, 7); c.fill(); });
+    body.forEach((q, k) => { c.fillStyle = "rgba(190,236,120,.55)"; c.beginPath(); c.arc(q.x, q.y, q.r*.32, 0, 7); c.fill(); });
+    body.forEach((q, k) => { if(k % 7 === 3 && q.r > 2.5){ c.fillStyle = "rgba(24,110,44,.75)"; c.beginPath(); c.ellipse(q.x, q.y, q.r*.78, q.r*.5, 0, 0, 7); c.fill(); c.strokeStyle = "rgba(210,245,140,.7)"; c.lineWidth = Math.max(1, q.r*.12); c.stroke(); } });
+    // head
+    const hd = body[body.length - 1], nx = body[body.length - 4];
+    const ang = Math.atan2(hd.y - nx.y, hd.x - nx.x) + (rest ? Math.sin(rest*2.6)*.18 : 0), rh = rmax*1.12, dx = Math.cos(ang), dy = Math.sin(ang), px = -dy, py = dx;
+    c.save(); c.translate(hd.x, hd.y); c.rotate(ang);
+    c.fillStyle = "#1d5e2b"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.62 + 1.6, rh*1.16 + 1.6, 0, 0, 7); c.fill();
+    c.fillStyle = "#56c353"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.62, rh*1.16, 0, 0, 7); c.fill();
+    c.fillStyle = "rgba(190,236,120,.6)"; c.beginPath(); c.ellipse(rh*.1, 0, rh*.9, rh*.42, 0, 0, 7); c.fill();
+    for(const sd of [-1, 1]){
+      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.62, sd*rh*.62, rh*.36, 0, 7); c.fill();
+      c.fillStyle = "#14301a"; c.beginPath(); c.arc(rh*.72, sd*rh*.62, rh*.21, 0, 7); c.fill();
+      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.78, sd*rh*.56, rh*.07, 0, 7); c.fill();
+      c.fillStyle = "rgba(20,60,30,.7)"; c.beginPath(); c.arc(rh*1.7, sd*rh*.22, rh*.06, 0, 7); c.fill();
+    }
+    // forked tongue flicks out now and then
+    const ph = (sec % 1.6)/1.6, tl = ph < .35 ? Math.sin(ph/.35*Math.PI)*rh*1.5 : 0;
+    if(tl > 1){ c.strokeStyle = "#e5484d"; c.lineCap = "round"; c.lineWidth = Math.max(1.4, rh*.14); c.beginPath(); c.moveTo(rh*1.9, 0); c.lineTo(rh*1.9 + tl, 0); c.moveTo(rh*1.9 + tl*.8, 0); c.lineTo(rh*1.9 + tl*1.05, -rh*.22); c.moveTo(rh*1.9 + tl*.8, 0); c.lineTo(rh*1.9 + tl*1.05, rh*.22); c.stroke(); }
+    c.restore(); c.globalAlpha = 1;
+  }
+
+  function frame(now){
+    if(!running) return;
+    if($("start").classList.contains("on") && path) draw(((now - t0)/1000) % CYCLE);
+    requestAnimationFrame(frame);
+  }
+  window.__heroSnake = { draw: sec => { running = false; layout(); draw(sec); } };           // freeze at a moment, for testing
+  const li = new Image();
+  li.onload = () => { axis = measureLadder(li); layout(); if(reduce){ draw(6.6); } else requestAnimationFrame(frame); };
+  li.src = IMG.ladder;
+  new ResizeObserver(() => { layout(); }).observe(host);
+})();
