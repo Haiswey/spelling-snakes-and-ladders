@@ -476,4 +476,4 @@ body{overflow-wrap:normal;word-break:normal;hyphens:none}
   63%{transform:translateY(-20%)}70%{transform:translateY(0)}77%{transform:translateY(-12%)}84%{transform:translateY(0)}90%,100%{transform:translateY(0)}}
 
 /* the whole snake is drawn on a canvas that reaches a little to the left of the scene so it slides in from outside */
-.hero-art .hero-snake{left:-35%;top:0;z-index:2;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24%);mask-image:linear-gradient(90deg,transparent 0,#000 24%)}
+.hero-art .hero-snake{left:-35%;top:0;z-index:2;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12%);mask-image:linear-gradient(90deg,transparent 0,#000 12%)}
