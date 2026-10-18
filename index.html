@@ -1654,46 +1654,43 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(
     const sh = sh0 + (sh1 - sh0)*(sec < climbT ? (.1*sec/climbT + .9*climb) : 1);   // head position along the track (a gentle ease at the end)
     const alpha = sec < 8.6 ? 1 : Math.max(0, 1 - (sec - 8.6)/.7);
     if(alpha <= 0) return; c.globalAlpha = alpha;
-    const rmax = .058*LL, lam = .3*LL, rest = sec > climbT ? (sec - climbT) : 0;
+    const rmax = .054*LL, lam = .5*LL, rest = sec > climbT ? (sec - climbT) : 0;
     const body = [], n = 120;
     for(let i = n; i >= 0; i--){
       const d = bodyLen*i/n, s = sh - d; if(s < 0 || s > (N-1)*path.ds) continue;
       const idx = Math.floor(s/path.ds), p0 = P[idx], p1 = P[Math.min(N-1, idx + 3)];
       let tx = p1[0] - p0[0], ty = p1[1] - p0[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
-      const onLadder = s > path.ladderStart*path.ds, env = (onLadder ? .09 : .075)*LL*(.55 + .45*smooth(0, .12, d/bodyLen));
+      const onLadder = s > path.ladderStart*path.ds, env = (onLadder ? .06 : .05)*LL*(.55 + .45*smooth(0, .12, d/bodyLen));
       const off = env*Math.sin(2*Math.PI*s/lam) + (rest ? Math.sin(rest*2.2 + d*.02)*.012*LL*(1 - d/bodyLen) : 0);
       const u = d/bodyLen, r = rmax*(.8 + .2*Math.sin(Math.PI*Math.min(1, u*.95 + .02)))*(1 - .86*smooth(.58, 1, u));
       body.push({ x:p0[0] - ty*off, y:p0[1] + tx*off, r, u, i });
     }
     if(body.length < 3) return;
-    // one smooth body: outline, green skin, pale belly edge, light back stripe and a few soft diamond marks (no separate discs)
-    const nrm = body.map((q, k) => { const a = body[Math.max(0, k - 1)], b = body[Math.min(body.length - 1, k + 1)]; let dx = b.x - a.x, dy = b.y - a.y; const l = Math.hypot(dx, dy) || 1; return [-dy/l, dx/l]; });
-    const ribbon = (w, fill) => {
-      c.beginPath();
-      body.forEach((q, k) => { const r = Math.max(.5, q.r*w); c[k ? "lineTo" : "moveTo"](q.x + nrm[k][0]*r, q.y + nrm[k][1]*r); });
-      for(let k = body.length - 1; k >= 0; k--){ const q = body[k], r = Math.max(.5, q.r*w); c.lineTo(q.x - nrm[k][0]*r, q.y - nrm[k][1]*r); }
-      c.closePath(); c.fillStyle = fill; c.fill();
-    };
+    // cartoon snake: one fat rounded line (dark outline, green skin, light belly-side stripe, round spots) and a big friendly head
     c.lineJoin = c.lineCap = "round";
-    ribbon(1 + 1.8/rmax, "#1d5e2b"); ribbon(1, "#4cb44b"); ribbon(.62, "#3a9a41"); ribbon(.26, "rgba(200,240,130,.7)");
-    for(let k = 6; k < body.length - 6; k += 9){ const q = body[k]; if(q.r < 2.5) continue; const a = Math.atan2(nrm[k][0], -nrm[k][1]);
-      c.save(); c.translate(q.x, q.y); c.rotate(a); c.fillStyle = "rgba(22,95,40,.55)"; c.beginPath(); c.moveTo(-q.r*.5, 0); c.lineTo(0, -q.r*.42); c.lineTo(q.r*.5, 0); c.lineTo(0, q.r*.42); c.closePath(); c.fill(); c.restore(); }
+    const seg = (w, col, shift) => { for(let k = 1; k < body.length; k++){ const a = body[k-1], b = body[k], r = (a.r + b.r)/2*w; c.strokeStyle = col; c.lineWidth = Math.max(1, r*2); const o = shift ? shift*r : 0, n = nrm[k];
+      c.beginPath(); c.moveTo(a.x + n[0]*o, a.y + n[1]*o); c.lineTo(b.x + n[0]*o, b.y + n[1]*o); c.stroke(); } };
+    const nrm = body.map((q, k) => { const a = body[Math.max(0, k - 1)], b = body[Math.min(body.length - 1, k + 1)]; const dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy) || 1; return [-dy/l, dx/l]; });
+    seg(1.08, "#22703a"); seg(1, "#58c45a"); seg(.42, "#a6e57a", .34);
+    c.fillStyle = "rgba(30,120,50,.55)";
+    for(let k = 5; k < body.length - 8; k += 8){ const q = body[k]; if(q.r > 3){ c.beginPath(); c.arc(q.x - nrm[k][0]*q.r*.1, q.y - nrm[k][1]*q.r*.1, q.r*.2, 0, 7); c.fill(); } }
     // head
-    const hd = body[body.length - 1], nx = body[body.length - 4];
-    const ang = Math.atan2(hd.y - nx.y, hd.x - nx.x) + (rest ? Math.sin(rest*2.6)*.18 : 0), rh = rmax*1.12, dx = Math.cos(ang), dy = Math.sin(ang), px = -dy, py = dx;
+    const hd = body[body.length - 1], nx = body[body.length - 5];
+    const ang = Math.atan2(hd.y - nx.y, hd.x - nx.x) + (rest ? Math.sin(rest*2.6)*.18 : 0), rh = rmax*1.35;
     c.save(); c.translate(hd.x, hd.y); c.rotate(ang);
-    c.fillStyle = "#1d5e2b"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.62 + 1.6, rh*1.16 + 1.6, 0, 0, 7); c.fill();
-    c.fillStyle = "#56c353"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.62, rh*1.16, 0, 0, 7); c.fill();
-    c.fillStyle = "rgba(190,236,120,.6)"; c.beginPath(); c.ellipse(rh*.1, 0, rh*.9, rh*.42, 0, 0, 7); c.fill();
+    c.fillStyle = "#22703a"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.28 + 1.6, rh*1.08 + 1.6, 0, 0, 7); c.fill();
+    c.fillStyle = "#62cc5f"; c.beginPath(); c.ellipse(rh*.35, 0, rh*1.28, rh*1.08, 0, 0, 7); c.fill();
+    c.fillStyle = "#a6e57a"; c.beginPath(); c.ellipse(rh*.62, 0, rh*.7, rh*.38, 0, 0, 7); c.fill();
     for(const sd of [-1, 1]){
-      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.62, sd*rh*.62, rh*.36, 0, 7); c.fill();
-      c.fillStyle = "#14301a"; c.beginPath(); c.arc(rh*.72, sd*rh*.62, rh*.21, 0, 7); c.fill();
-      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.78, sd*rh*.56, rh*.07, 0, 7); c.fill();
-      c.fillStyle = "rgba(20,60,30,.7)"; c.beginPath(); c.arc(rh*1.7, sd*rh*.22, rh*.06, 0, 7); c.fill();
+      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.45, sd*rh*.5, rh*.34, 0, 7); c.fill();
+      c.fillStyle = "#14301a"; c.beginPath(); c.arc(rh*.53, sd*rh*.5, rh*.2, 0, 7); c.fill();
+      c.fillStyle = "#fff"; c.beginPath(); c.arc(rh*.59, sd*rh*.44, rh*.07, 0, 7); c.fill();
+      c.fillStyle = "rgba(255,120,130,.55)"; c.beginPath(); c.arc(rh*.05, sd*rh*.78, rh*.17, 0, 7); c.fill();
     }
+    c.strokeStyle = "#1c5a30"; c.lineWidth = Math.max(1, rh*.07); c.beginPath(); c.arc(rh*1.08, 0, rh*.2, -.9, .9); c.stroke();
     // forked tongue flicks out now and then
-    const ph = (sec % 1.6)/1.6, tl = ph < .35 ? Math.sin(ph/.35*Math.PI)*rh*1.5 : 0;
-    if(tl > 1){ c.strokeStyle = "#e5484d"; c.lineCap = "round"; c.lineWidth = Math.max(1.4, rh*.14); c.beginPath(); c.moveTo(rh*1.9, 0); c.lineTo(rh*1.9 + tl, 0); c.moveTo(rh*1.9 + tl*.8, 0); c.lineTo(rh*1.9 + tl*1.05, -rh*.22); c.moveTo(rh*1.9 + tl*.8, 0); c.lineTo(rh*1.9 + tl*1.05, rh*.22); c.stroke(); }
+    const ph = (sec % 1.6)/1.6, tl = ph < .35 ? Math.sin(ph/.35*Math.PI)*rh*1.2 : 0;
+    if(tl > 1){ c.strokeStyle = "#e5484d"; c.lineCap = "round"; c.lineWidth = Math.max(1.4, rh*.12); c.beginPath(); c.moveTo(rh*1.5, 0); c.lineTo(rh*1.5 + tl, 0); c.moveTo(rh*1.5 + tl*.8, 0); c.lineTo(rh*1.5 + tl*1.05, -rh*.2); c.moveTo(rh*1.5 + tl*.8, 0); c.lineTo(rh*1.5 + tl*1.05, rh*.2); c.stroke(); }
     c.restore(); c.globalAlpha = 1;
   }
 
