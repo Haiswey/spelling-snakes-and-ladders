@@ -93,6 +93,7 @@ let actx = null;
 function ac(){ try{ if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==="suspended") actx.resume(); }catch(e){} return actx; }
 function tone(freq, dur=.15, type="sine", vol=.2, delay=0, slideTo){
   if(muted) return; const c = ac(); if(!c) return;
+  if(c.state !== "running"){ const t0 = performance.now(); c.resume().then(() => tone(freq, dur, type, vol, Math.max(0, delay - (performance.now() - t0)/1000), slideTo)).catch(() => {}); return; }   // the very first sound waits until the browser has unlocked audio
   const t = c.currentTime+delay, o = c.createOscillator(), g = c.createGain();
   o.type = type; o.frequency.setValueAtTime(freq,t); if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
   g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(.001,t+dur);
@@ -103,6 +104,10 @@ const sfx = {
   dice(ms){
     for(let i=0;i<14;i++) tone(260+Math.random()*420, .035, "square", .035, (i/14)*ms/1000*.9);
     [[.3125,.26],[.625,.18],[.9375,.12],[1,.2]].forEach(([f,v]) => { const d = f*ms/1000; tone(150,.07,"square",v,d); tone(1100,.025,"triangle",v*.6,d); });
+  },
+  heroDice(){   // the dice on the home page: soft rattle, then a clack at each of its three bounces (see rollAcross/hopRoll in the CSS, 7 s loop)
+    for(let i=0;i<10;i++) tone(260+Math.random()*420, .035, "square", .022, i*.09);
+    [[.98,.14],[1.96,.1],[2.68,.07]].forEach(([d,v]) => { tone(150,.07,"square",v,d); tone(1100,.025,"triangle",v*.6,d); });
   },
   jump(){ tone(420,.07,"triangle",.14,0,640); },                     // takes off
   land(last){ tone(190,.08,"sine",.28); if(last){ tone(523,.16,"triangle",.16,.04); tone(784,.2,"triangle",.14,.12); } },   // lands (the last square gets a little chime = "stop")
@@ -811,8 +816,13 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(
     if(!path) return;
     c.clearRect(-padL, 0, W + padL, H);
     const P = path.P, N = P.length, bodyLen = path.bodyLen, LL = path.LL;
-    const climbT = 6.6, climb = smooth(0, 1, sec/climbT), sh0 = bodyLen, sh1 = (N - 1)*path.ds;
-    const sh = sh0 + (sh1 - sh0)*(sec < climbT ? (.1*sec/climbT + .9*climb) : 1);   // head position along the track (a gentle ease at the end)
+    const climbT = 6.6, groundT = 2.4, sLad = path.ladderStart*path.ds, sEnd = (N - 1)*path.ds;
+    // slides in along the ground, then glides up the ladder one rung-gap at a time (4 glides with a short pause between, like stepping up the rungs)
+    const steps = 4, stepP = x => { const k = Math.min(steps - 1, Math.floor(x*steps)), f = x*steps - k; return (k + smooth(0, .72, f))/steps; };
+    let sh;
+    if(sec < groundT) sh = bodyLen + (sLad - bodyLen)*(1 - Math.pow(1 - sec/groundT, 1.5));
+    else if(sec < climbT) sh = sLad + (sEnd - sLad)*stepP((sec - groundT)/(climbT - groundT));
+    else sh = sEnd;
     const alpha = sec < 8.6 ? 1 : Math.max(0, 1 - (sec - 8.6)/.7);
     if(alpha <= 0) return; c.globalAlpha = alpha;
     const rmax = .054*LL, lam = .5*LL, rest = sec > climbT ? (sec - climbT) : 0;
@@ -865,4 +875,18 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if(
   li.onload = () => { axis = measureLadder(li); layout(); if(reduce){ draw(6.8); } else requestAnimationFrame(frame); };
   li.src = IMG.ladder;
   new ResizeObserver(() => { layout(); }).observe(host);
+})();
+
+/* home page dice: browsers only allow sound after a first tap or key press, so the roll becomes audible from then on */
+(function heroDiceSound(){
+  let unlocked = false, timer = 0;
+  const roller = () => document.querySelector(".hero-art .roller");
+  function schedule(){
+    clearTimeout(timer); const r = roller(); if(!r) return;
+    const a = r.getAnimations && r.getAnimations()[0]; if(!a) return;
+    const cur = Number(a.currentTime) % 7000, wait = ((.06*7000 - cur) + 7000) % 7000 + 20;      // the roll starts at 6% of the loop
+    timer = setTimeout(() => { if($("start").classList.contains("on") && !document.hidden) sfx.heroDice(); schedule(); }, wait);
+  }
+  const unlock = () => { if(unlocked) return; unlocked = true; ac(); schedule(); removeEventListener("pointerdown", unlock); removeEventListener("keydown", unlock); };
+  addEventListener("pointerdown", unlock); addEventListener("keydown", unlock);
 })();
